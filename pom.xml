@@ -9,7 +9,5 @@
   <modules>
     <module>UI</module>
     <module>Core</module>
-    <module>PluginFramework</module>
-    <module>NetworkClientPlugin</module>
   </modules>
 </project>
