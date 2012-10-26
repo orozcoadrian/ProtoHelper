@@ -5,9 +5,10 @@ import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
-import com.google.protobuf.TextFormat;
-import com.pwf.plugin.PluginInformation;
-import com.pwf.plugin.PluginManagerLite;
+import com.pwf.ls.messaging.ExampleMessageProto;
+import com.pwf.network.client.NettyProtobufNetworkClient;
+import com.pwf.plugin.PluginManager;
+import com.pwf.plugin.PluginManagerFactory;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.plugin.network.client.NetworkClientSettings;
 import java.awt.BorderLayout;
@@ -93,81 +94,43 @@ public class App
         return newInstance;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-                                                  NoSuchMethodException, IllegalArgumentException,
+    public static void main(String[] args) throws ClassNotFoundException,
+                                                  InstantiationException,
+                                                  IllegalAccessException,
+                                                  NoSuchMethodException,
+                                                  IllegalArgumentException,
                                                   InvocationTargetException
     {
 
-        NetworkClientPlugin networkClientPlugin = new NetworkClientPlugin()
+        ExampleMessageProto.Example message = ExampleMessageProto.Example.newBuilder().setId(2100).setJob("Software Engineer 2").setName("Mike").build();
+
+        PluginManager manager = PluginManagerFactory.createPluginManager();
+
+
+        NetworkClientPlugin client = new NettyProtobufNetworkClient();
+        client.setMessageType(ExampleMessageProto.Example.getDefaultInstance());
+        manager.load(client);
+
+
+        client.connect(new NetworkClientSettings()
         {
-            NetworkClientSettings networkClientSettings = new NetworkClientSettings()
+            public int getPort()
             {
-                public int getPort()
-                {
-                    return 5011;
-                }
+                return 5011;
+            }
 
-                public boolean isSSL()
-                {
-                    return false;
-                }
-
-                public String getIpAddress()
-                {
-                    return "localhost";
-                }
-            };
-
-            public void connect(NetworkClientSettings networkClientSettings)
+            public boolean isSSL()
             {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
-            public void disconnect()
+            public String getIpAddress()
             {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return "localhost";
             }
+        });
+        client.sendMessage(message);
 
-            public <Message> void onHandleMessageReceived(Message message)
-            {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public <Message> void sendMessage(Message message)
-            {
-               
-            }
-
-            public void onErrorDetected(Exception exeception)
-            {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public void initialize(PluginManagerLite pluginManager)
-            {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public void start()
-            {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public void stop()
-            {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public PluginInformation getPluginInformation()
-            {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public boolean isConnected()
-            {
-                return true;
-            }
-        };
         long start = System.currentTimeMillis();
         ClassFinder cf = new ClassFinder(Message.class);
         Set<String> classes = cf.getClasses();

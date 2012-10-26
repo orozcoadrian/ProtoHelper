@@ -28,5 +28,11 @@
       <version>1.0-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>com.pwf</groupId>
+      <artifactId>NetworkingClient</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
 </project>
