@@ -7,6 +7,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.pwf.ls.messaging.ExampleMessageProto;
 import com.pwf.network.client.NettyProtobufNetworkClient;
+import com.pwf.plugin.Plugin;
 import com.pwf.plugin.PluginManager;
 import com.pwf.plugin.PluginManagerFactory;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
@@ -105,9 +106,13 @@ public class App
         ExampleMessageProto.Example message = ExampleMessageProto.Example.newBuilder().setId(2100).setJob("Software Engineer 2").setName("Mike").build();
 
         PluginManager manager = PluginManagerFactory.createPluginManager();
+        manager.loadAllPlugins();
+        for (Plugin plugin : manager.getPlugins())
+        {
+            System.out.println("Plugin: " + plugin);
+        }
+        NetworkClientPlugin client = manager.getPlugin(NetworkClientPlugin.class);
 
-
-        NetworkClientPlugin client = new NettyProtobufNetworkClient();
         client.setMessageType(ExampleMessageProto.Example.getDefaultInstance());
         manager.load(client);
 

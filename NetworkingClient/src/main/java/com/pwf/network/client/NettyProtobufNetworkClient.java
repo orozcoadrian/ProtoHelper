@@ -121,4 +121,12 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
             lastWriteFuture.awaitUninterruptibly();
         }
     }
+
+    @Override
+    public String toString()
+    {
+        PluginInformation pluginInfo = this.getPluginInformation();
+        return String.format("%s (%s) %s © %s", pluginInfo.getName(), pluginInfo.getIdentifier(), pluginInfo.getVersion(),
+                pluginInfo.getProvider());
+    }
 }
