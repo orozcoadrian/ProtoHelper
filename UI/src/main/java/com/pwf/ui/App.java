@@ -6,7 +6,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.pwf.ls.messaging.ExampleMessageProto;
-import com.pwf.network.client.NettyProtobufNetworkClient;
 import com.pwf.plugin.Plugin;
 import com.pwf.plugin.PluginManager;
 import com.pwf.plugin.PluginManagerFactory;
