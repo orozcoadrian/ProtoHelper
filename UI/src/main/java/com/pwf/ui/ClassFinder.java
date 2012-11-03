@@ -1,9 +1,7 @@
-// -----------------------------------------------------------------------------
-// Copyright 2011-2012  Harris Corporation, All Rights Reserved
-// -----------------------------------------------------------------------------
 package com.pwf.ui;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,8 +11,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * <p>This class implements the capability to search over the current classpath retrieving classes that implement a
- * certain interface.</p>
+ * <p>This class implements the capability to search over the current classpath
+ * retrieving classes that implement a certain interface.</p>
  *
  * Copyright 2001 Sapient
  *
@@ -40,20 +38,24 @@ public class ClassFinder
      * The set of classes found matching the provided criteria.
      */
     protected Set classes = new HashSet(2000);
+    private ClassLoader classLoader = this.getClass().getClassLoader();
 
     /**
-     * <p>Instantiates the type of MBeanHarvester that will return all classes in the entire classpath.</p>
+     * <p>Instantiates the type of MBeanHarvester that will return all classes
+     * in the entire classpath.</p>
      */
     public ClassFinder()
     {
     }
 
     /**
-     * <p>Instantiates the type of MBeanHarvester that will return all classes that are assignable to the supplied
-     * class. This would include all implementations of it, if it is an interface or it and all subclasses of it if it's
-     * a class.</p>
+     * <p>Instantiates the type of MBeanHarvester that will return all classes
+     * that are assignable to the supplied class. This would include all
+     * implementations of it, if it is an interface or it and all subclasses of
+     * it if it's a class.</p>
      *
-     * @param superClass the Class that should be searched for along with implementations and subclasses
+     * @param superClass the Class that should be searched for along with
+     * implementations and subclasses
      */
     public ClassFinder(Class superClass)
     {
@@ -62,15 +64,17 @@ public class ClassFinder
     }
 
     /**
-     * <p>Instantiates the type of MBeanHarvester that will return all classes that are assignable to the supplied class
-     * and are part of the supplied package. This would include all implementations of it, if it is an interface or it
-     * and all subclasses of it if it's a class. The supplied
+     * <p>Instantiates the type of MBeanHarvester that will return all classes
+     * that are assignable to the supplied class and are part of the supplied
+     * package. This would include all implementations of it, if it is an
+     * interface or it and all subclasses of it if it's a class. The supplied
      * <code>requiredPathSubstring must be part of the fully
      * qualified classname.</p>
      *
      * @param superClass the Class that should be searched for along with
      *   implementations and subclasses
-     * @param requiredPathSubstring the String part that must be found in the classes FQN
+     * @param requiredPathSubstring the String part that must be found in the
+     * classes FQN
      */
     public ClassFinder(Class superClass, String requiredPathSubstring)
     {
@@ -79,8 +83,14 @@ public class ClassFinder
         this.requiredPathSubstring = requiredPathSubstring;
     }
 
+    public void setClassLoader(ClassLoader classLoader)
+    {
+        this.classLoader = classLoader;
+    }
+
     /**
-     * <p>Adds a class name to the list of found classes if and only if it meets the configured requirements.</p>
+     * <p>Adds a class name to the list of found classes if and only if it meets
+     * the configured requirements.</p>
      *
      * @param className the FQN String name of the class to add
      */
@@ -104,11 +114,7 @@ public class ClassFinder
 
                     // TODO: GH - add a way to search other classpaths and the
                     // system classpath.
-                    Class theClass =
-                            Class.forName(
-                            className,
-                            false,
-                            this.getClass().getClassLoader());
+                    Class theClass = Class.forName(className, false, classLoader);
 
                     if (this.superClass.isAssignableFrom(theClass))
                     {
@@ -142,21 +148,30 @@ public class ClassFinder
 
         StringTokenizer st = new StringTokenizer(classpath, pathSeparator);
 
+        Collection<File> moreElements = new HashSet<File>();
         // 2) for each element in the classpath
         while (st.hasMoreTokens())
         {
             File currentDirectory = new File(st.nextToken());
-
+            //System.out.println("CUrrent Directory: " + );
+            moreElements.add(new File(currentDirectory.getAbsoluteFile().getParent()));
             processFile(currentDirectory.getAbsolutePath(), "");
 
+        }
+
+        for (File file : moreElements)
+        {
+            System.out.println("File: " + file.getAbsolutePath());
+            processFile(file.getAbsolutePath(), "");
         }
 
         return this.classes;
     }
 
     /**
-     * Recursively search through Directories with special checks to recognize zip and jar files. (Zip and Jar files
-     * return true from &lt;File&gt;.isDirectory())
+     * Recursively search through Directories with special checks to recognize
+     * zip and jar files. (Zip and Jar files return true from
+     * &lt;File&gt;.isDirectory())
      *
      * @param base the base file path to search
      * @param current the current recursively searched file path being searched
@@ -174,6 +189,7 @@ public class ClassFinder
             }
             catch (Exception e)
             {
+                e.printStackTrace();
                 // The directory was not found so the classpath was probably in
                 // error or we don't have rights to it
             }
@@ -185,10 +201,15 @@ public class ClassFinder
             Set directories = new HashSet();
 
             File[] children = currentDirectory.listFiles();
-
+            System.out.println("CurrentDirectory: " + currentDirectory.getAbsolutePath());
+            for (File file : children)
+            {
+                System.out.println("Current Children: " + file.getAbsolutePath());
+            }
             // if no children, return
             if (children == null || children.length == 0)
             {
+                System.out.println("No children returning");
                 return;
             }
 
@@ -198,6 +219,7 @@ public class ClassFinder
                 File child = children[i];
                 if (child.isDirectory())
                 {
+                    // System.out.println("Ima directory: " + children[i].getAbsolutePath());
                     directories.add(children[i]);
                 }
                 else
@@ -218,8 +240,10 @@ public class ClassFinder
             //call process file on each directory.  This is an iterative call!!
             for (Iterator i = directories.iterator(); i.hasNext();)
             {
-                processFile(base, current + ((current == "") ? "" : File.separator)
-                        + ((File) i.next()).getName());
+                String nextCurrent = current + (("".equals(current)) ? "" : File.separator)
+                        + ((File) i.next()).getName();
+                System.out.println("Nextcurrent: " + nextCurrent);
+                processFile(base, nextCurrent);
             }
         }
     }
@@ -228,7 +252,8 @@ public class ClassFinder
      * <p>Looks at the name of a file to determine if it is an archive</p>
      *
      * @param name the name of a file
-     * @return true if a file in the classpath is an archive such as a Jar or Zip file
+     * @return true if a file in the classpath is an archive such as a Jar or
+     * Zip file
      */
     protected boolean isArchive(String name)
     {
@@ -259,8 +284,9 @@ public class ClassFinder
     }
 
     /**
-     * <P>Iterates through the files in a zip looking for files that may be classes. This is not recursive as zip's in
-     * zip's are not searched by the classloader either.</p>
+     * <P>Iterates through the files in a zip looking for files that may be
+     * classes. This is not recursive as zip's in zip's are not searched by the
+     * classloader either.</p>
      *
      * @param file The ZipFile to be searched
      */

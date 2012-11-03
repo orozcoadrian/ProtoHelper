@@ -6,15 +6,27 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.pwf.ls.messaging.ExampleMessageProto;
+import com.pwf.plugin.ErrorEventListener;
 import com.pwf.plugin.Plugin;
 import com.pwf.plugin.PluginManager;
 import com.pwf.plugin.PluginManagerFactory;
+import com.pwf.plugin.impl.PluginUtils;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.plugin.network.client.NetworkClientSettings;
 import java.awt.BorderLayout;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 import javax.swing.*;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 /**
  * Hello world!
@@ -99,68 +111,131 @@ public class App
                                                   IllegalAccessException,
                                                   NoSuchMethodException,
                                                   IllegalArgumentException,
-                                                  InvocationTargetException
+                                                  InvocationTargetException,
+                                                  MalformedURLException
     {
-
+        String classpath = System.getProperty("java.class.path");
+        System.out.println("Classpath=" + classpath);
+        System.out.println("userdir=" + System.getProperty("user.dir"));
         ExampleMessageProto.Example message = ExampleMessageProto.Example.newBuilder().setId(2100).setJob("Software Engineer 2").setName("Mike").build();
 
         PluginManager manager = PluginManagerFactory.createPluginManager();
+
+        manager.addErrorHandler(new ErrorEventListener()
+        {
+            @Override
+            public void onErrorOccurred(Plugin plugin, Throwable exception)
+            {
+                //error happened
+                System.out.println("Error: " + exception.getMessage());
+            }
+        });
+
         manager.loadAllPlugins();
         for (Plugin plugin : manager.getPlugins())
         {
             System.out.println("Plugin: " + plugin);
         }
         NetworkClientPlugin client = manager.getPlugin(NetworkClientPlugin.class);
-
-        client.setMessageType(ExampleMessageProto.Example.getDefaultInstance());
-        manager.load(client);
-
-
-        client.connect(new NetworkClientSettings()
+        if (client != null)
         {
+            client.setMessageType(ExampleMessageProto.Example.getDefaultInstance());
+            manager.activate(client);
+
+
+            client.connect(new NetworkClientSettings()
+            {
+                @Override
+                public int getPort()
+                {
+                    return 5011;
+                }
+
+                @Override
+                public boolean isSSL()
+                {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+
+                @Override
+                public String getIpAddress()
+                {
+                    return "localhost";
+                }
+            });
+            client.sendMessage(message);
+        }
+        else
+        {
+            System.out.println("NETWORK PLUGIN IS NULL");
+        }
+        NetworkClientPlugin clonePlugin = manager.clonePlugin(client.getClass());
+        clonePlugin.setMessageType(ExampleMessageProto.Example.getDefaultInstance());
+     
+        clonePlugin.onActivated();
+        clonePlugin.connect(new NetworkClientSettings()
+        {
+            @Override
             public int getPort()
             {
                 return 5011;
             }
 
+            @Override
             public boolean isSSL()
             {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
+            @Override
             public String getIpAddress()
             {
                 return "localhost";
             }
         });
-        client.sendMessage(message);
+
+        clonePlugin.sendMessage(message);
+
+
 
         long start = System.currentTimeMillis();
-        ClassFinder cf = new ClassFinder(Message.class);
-        Set<String> classes = cf.getClasses();
-        Set<String> filteredClasses = new HashSet<String>();
-        for (String s : classes)
+
+        List<URL> jarFilesonClasspathUrl = PluginUtils.getJarFilesonClasspathUrl("lib");
+        URL[] urlArray = jarFilesonClasspathUrl.toArray(new URL[0]);
+        URLClassLoader urlClassLoader = new URLClassLoader(urlArray);
+        Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader(urlClassLoader)).setScanners(new SubTypesScanner(),
+                new TypeAnnotationsScanner(),
+                new ResourcesScanner()));
+        Set<Class<? extends Message>> classes = reflections.getSubTypesOf(Message.class);
+
+        Set<Class<? extends Message>> filteredClasses = new HashSet<Class<? extends Message>>();
+
+        for (Class<? extends Message> c : classes)
         {
-            if (!s.contains(PROTOBUF_CLASSPATH_STRING))
+            if (!c.getName().contains(PROTOBUF_CLASSPATH_STRING))
             {
-                filteredClasses.add(s);
+                filteredClasses.add(c);
             }
         }
-        List<String> sorted = new ArrayList<String>(filteredClasses);
-        Collections.sort(sorted);
+
+
+
+        System.out.println("********************* Filtered classes size:" + classes.size());
+        //List<Class<? extends Message>> sorted = new ArrayList<Class<? extends Message>>(filteredClasses);
+        //  Collections.sort(sorted);
 
         List<Builder> builders = new ArrayList<Builder>();
 
         int i = 1;
-        for (String string : sorted)
+        for (Class<? extends Message> c : filteredClasses)
         {
             //  System.out.println(i + ":" + string);
             i++;
-            Class<Message> forName = null;
+            Class<? extends Message> forName = null;
             Message.Builder newInstance = null;
             try
             {
-                forName = (Class<Message>) Class.forName(string);
+                forName = c; //  (Class<Message>) Class.forName(string);
                 newInstance = (Message.Builder) forName.getMethod("newBuilder").invoke(forName, new Object[]
                         {
                         });

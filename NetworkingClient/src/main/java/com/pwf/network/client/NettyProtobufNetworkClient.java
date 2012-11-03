@@ -17,7 +17,8 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
  * @author mfullen
  */
 public class NettyProtobufNetworkClient<M extends MessageLite> implements
-        NetworkClientPlugin<M>
+        NetworkClientPlugin<M>,
+        ErrorHandler
 {
     private PluginManagerLite pluginManager = null;
     private ClientBootstrap bootstrap = null;
@@ -43,7 +44,7 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
         public String getIdentifier()
         {
-            return "com.pwf.netty.protobuf.client";
+            return NettyProtobufNetworkClient.class.getName();
         }
     };
 
@@ -59,7 +60,8 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
         if (!future.isSuccess())
         {
-            future.getCause().printStackTrace();
+            this.pluginManager.reportError(this, future.getCause());
+            //future.getCause().printStackTrace();
             bootstrap.releaseExternalResources();
             return;
         }
@@ -75,28 +77,23 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
         bootstrap.releaseExternalResources();
     }
 
-    public void onErrorDetected(Exception exeception)
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public boolean isConnected()
     {
         return this.channel.isConnected();
     }
 
-    public void initialize(PluginManagerLite pluginManager)
+    public void onLoaded(PluginManagerLite pluginManager)
     {
         this.pluginManager = pluginManager;
-        bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
-        bootstrap.setPipelineFactory(new ChannelPipelineFactoryImpl(messageLite));
+        this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
     }
 
-    public void start()
+    public void onActivated()
     {
+        this.bootstrap.setPipelineFactory(new ChannelPipelineFactoryImpl(messageLite, this));
     }
 
-    public void stop()
+    public void onDeactivated()
     {
         this.disconnect();
     }
@@ -128,5 +125,10 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
         PluginInformation pluginInfo = this.getPluginInformation();
         return String.format("%s (%s) %s © %s", pluginInfo.getName(), pluginInfo.getIdentifier(), pluginInfo.getVersion(),
                 pluginInfo.getProvider());
+    }
+
+    public void onErrorOccured(Throwable e)
+    {
+        this.pluginManager.reportError(this, e);
     }
 }

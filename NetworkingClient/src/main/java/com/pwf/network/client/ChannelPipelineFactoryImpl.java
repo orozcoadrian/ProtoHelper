@@ -1,8 +1,8 @@
 package com.pwf.network.client;
 
-
-
 import com.google.protobuf.MessageLite;
+import com.pwf.plugin.Plugin;
+import com.pwf.plugin.PluginManagerLite;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -37,10 +37,12 @@ public class ChannelPipelineFactoryImpl implements ChannelPipelineFactory
     public static final String FRAME_ENCODER = "frameEncoder";
     public static final String PROTOBUF_DECODER = "protobufDecoder";
     public static final String PROTOBUF_ENCODER = "protobufEncoder";
+    private final ErrorHandler errorHandler;
 
-    public ChannelPipelineFactoryImpl(MessageLite messageLite)
+    public ChannelPipelineFactoryImpl(MessageLite messageLite, ErrorHandler errorHandler)
     {
         this.messageLite = messageLite;
+        this.errorHandler = errorHandler;
     }
 
     public ChannelPipeline getPipeline() throws Exception
@@ -101,8 +103,7 @@ public class ChannelPipelineFactoryImpl implements ChannelPipelineFactory
             public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
                     throws Exception
             {
-                logger.error("error", e);
-                super.exceptionCaught(ctx, e);
+                errorHandler.onErrorOccured(e.getCause());
             }
         });
         return pipeline;
