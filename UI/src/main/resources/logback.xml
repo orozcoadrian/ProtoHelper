@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration>
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+
+<!--    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>mulit-log-${bySecond}.txt</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %-24.24([%thread]) %-10.10logger{0} %msg%n</pattern>
+        </encoder>
+    </appender>-->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>TRACE</level>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %-24.24([%thread]) %-10.10logger{0} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.reflections.Reflections"  level="OFF" />
+
+
+    <root level="DEBUG">
+<!--    <appender-ref ref="FILE" />-->
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
