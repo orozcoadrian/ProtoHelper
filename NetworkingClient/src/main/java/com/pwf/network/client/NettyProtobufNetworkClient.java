@@ -63,7 +63,6 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
             this.pluginManager.reportError(this, future.getCause());
             //future.getCause().printStackTrace();
             bootstrap.releaseExternalResources();
-            return;
         }
     }
 

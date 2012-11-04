@@ -6,10 +6,13 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ProtobufHelper</name>
+
     <modules>
         <module>UI</module>
         <module>Core</module>
         <module>NetworkingClient</module>
+        <module>ProtoHelperPlatform</module>
+        <module>Application</module>
     </modules>
 
     <dependencies>
@@ -19,5 +22,17 @@
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.7</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
+
 </project>
