@@ -42,6 +42,14 @@ public class DefaultCorePlugin implements CoreEnginePHP
         return this.engine;
     }
 
+    @Override
+    public String toString()
+    {
+        PluginInformation pluginInfo = this.getPluginInformation();
+        return String.format("%s (%s) %s © %s", pluginInfo.getName(), pluginInfo.getIdentifier(), pluginInfo.getVersion(),
+                pluginInfo.getProvider());
+    }
+
     protected static class PluginInformationImpl implements PluginInformation
     {
         public PluginInformationImpl()

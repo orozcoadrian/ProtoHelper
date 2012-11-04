@@ -31,7 +31,7 @@ local.properties
 
 #mvn
 target
-UI/plugins
+plugins
 
 #################
 ## Visual Studio
