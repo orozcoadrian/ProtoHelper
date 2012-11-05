@@ -55,6 +55,7 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
     public void connect(NetworkClientSettings networkClientSettings)
     {
+        this.bootstrap.setPipelineFactory(new ChannelPipelineFactoryImpl(messageLite, this));
         future = bootstrap.connect(new InetSocketAddress(networkClientSettings.getIpAddress(), networkClientSettings.getPort()));
         channel = future.awaitUninterruptibly().getChannel();
 
@@ -78,7 +79,7 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
     public boolean isConnected()
     {
-        return this.channel.isConnected();
+        return this.channel != null && this.channel.isConnected();
     }
 
     public void onLoaded(PluginManagerLite pluginManager)
@@ -89,7 +90,6 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
     public void onActivated()
     {
-        this.bootstrap.setPipelineFactory(new ChannelPipelineFactoryImpl(messageLite, this));
     }
 
     public void onDeactivated()

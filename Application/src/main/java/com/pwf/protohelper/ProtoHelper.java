@@ -62,8 +62,7 @@ public class ProtoHelper
         if (ui == null)
         {
             ui = new ConsoleUserInterface();
-            manager.addPlugin(ui);
-            manager.activate(ui);
+            manager.loadAndActivatePlugin(ui);
         }
 
         ui.startInterface(engine);

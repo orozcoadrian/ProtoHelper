@@ -7,6 +7,8 @@ import com.pwf.protohelper.platform.UserInterfacePHP;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -17,10 +19,45 @@ public class ConsoleUserInterface implements UserInterfacePHP
     private PluginManagerLite manager = null;
     private final PluginInformation pluginInformation = new PluginInformationImpl();
     private Engine engine = null;
+    private Map<String, Command> commands = new HashMap<String, Command>();
+
+    public ConsoleUserInterface()
+    {
+    }
+
+    protected final void initialize()
+    {
+        this.commands.put("network", new NetworkApp(this.manager, engine));
+        this.commands.put("help", new Command()
+        {
+            public String getName()
+            {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void execute(String[] args)
+            {
+                helpMethod();
+            }
+        });
+        this.commands.put("info", new Command()
+        {
+            public String getName()
+            {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void execute(String[] args)
+            {
+                infoMethod();
+            }
+        });
+    }
 
     public void startInterface(Engine coreEngine)
     {
         this.engine = coreEngine;
+        this.initialize();
         this.consoleAppStarted();
     }
 
@@ -45,29 +82,30 @@ public class ConsoleUserInterface implements UserInterfacePHP
     public void consoleAppStarted()
     {
         System.out.println("Welcome to Protobuf Helper. type -help for commands. -exit closes the application");
+        System.out.print(">>");
         String s = null;
         try
         {
             BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
             while (!"-exit".equals(s = bufferRead.readLine()))
             {
-                if (s.equalsIgnoreCase("-help"))
+                String[] split = s.split(" ");
+                if (split.length > 0)
                 {
-                    helpMethod();
+                    String commandName = split[0];
+                    int remainingArgsSize = split.length - 1;
+                    String[] args = ConsoleUtils.getRemainingArguments(split);
+                    Command command = this.commands.get(commandName);
+                    if (command != null)
+                    {
+                        command.execute(args);
+                    }
+                    else
+                    {
+                        System.out.println("Command not recognized");
+                    }
                 }
-                else if (s.equalsIgnoreCase("-info"))
-                {
-                    infoMethod();
-                }
-                else if (s.equalsIgnoreCase("-protobufs"))
-                {
-                    validProtobufs();
-                }
-                else
-                {
-                    System.out.println("Command not recognized");
-                }
-
+                System.out.print(">>");
             }
             System.exit(0);
         }
@@ -85,7 +123,11 @@ public class ConsoleUserInterface implements UserInterfacePHP
 
     public void helpMethod()
     {
-        System.out.println("-info prints plugin information");
+        System.out.println("Commands:");
+        for (String string : this.commands.keySet())
+        {
+            System.out.println(string);
+        }
     }
 
     public void validProtobufs()

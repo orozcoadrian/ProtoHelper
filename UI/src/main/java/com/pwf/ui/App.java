@@ -1,6 +1,7 @@
 package com.pwf.ui;
 
 import com.google.protobuf.Message.Builder;
+import com.google.protobuf.TextFormat;
 import com.pwf.core.Engine;
 import com.pwf.core.EngineConfiguration;
 import com.pwf.core.NoLoadedMessagesException;
@@ -44,7 +45,8 @@ public class App
         logger.trace("Classpath=" + classpath);
         logger.trace("userdir=" + System.getProperty("user.dir"));
         ExampleMessageProto.Example message = ExampleMessageProto.Example.newBuilder().setId(2100).setJob("Software Engineer 2").setName("Mike").build();
-
+        String shortDebugString = TextFormat.shortDebugString(message);
+        System.out.println(shortDebugString);
         PluginManager manager = PluginManagerFactory.createPluginManager();
 
         manager.addErrorHandler(new ErrorEventListener()
