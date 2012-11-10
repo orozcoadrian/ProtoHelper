@@ -1,4 +1,4 @@
-package com.pwf.protohelper.platform.ui;
+package com.pwf.protohelper.platform.ui.console;
 
 /**
  *

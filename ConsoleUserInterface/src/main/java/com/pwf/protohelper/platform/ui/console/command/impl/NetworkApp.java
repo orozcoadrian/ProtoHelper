@@ -1,5 +1,7 @@
-package com.pwf.protohelper.platform.ui;
+package com.pwf.protohelper.platform.ui.console.command.impl;
 
+import com.pwf.protohelper.models.NetworkData;
+import com.pwf.protohelper.platform.ui.console.command.Command;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
@@ -8,6 +10,7 @@ import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.plugin.network.client.NetworkClientSettings;
+import com.pwf.protohelper.platform.ui.console.ConsoleUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -60,53 +63,6 @@ public class NetworkApp implements Command
     public String getName()
     {
         return "network";
-    }
-
-    class NetworkClientSettingsImpl implements NetworkClientSettings
-    {
-        private int port;
-        private boolean SSL;
-        private String ipAddress;
-
-        public NetworkClientSettingsImpl()
-        {
-        }
-
-        public int getPort()
-        {
-            return port;
-        }
-
-        public boolean isSSL()
-        {
-            return SSL;
-        }
-
-        public String getIpAddress()
-        {
-            return ipAddress;
-        }
-
-        public void setSSL(boolean SSL)
-        {
-            this.SSL = SSL;
-        }
-
-        public void setPort(int port)
-        {
-            this.port = port;
-        }
-
-        public void setIpAddress(String ipAddress)
-        {
-            this.ipAddress = ipAddress;
-        }
-
-        @Override
-        public String toString()
-        {
-            return String.format("Ip: %s Port: %d ssl:%b", this.getIpAddress(), this.getPort(), this.isSSL());
-        }
     }
 
     private class ConnectCommand implements Command
@@ -188,51 +144,6 @@ public class NetworkApp implements Command
         {
             System.out.println(i + ": " + builder.getClass().getName());
             i++;
-        }
-    }
-
-    public class NetworkData
-    {
-        private NetworkClientPlugin networkClientPlugin;
-        private Message.Builder message;
-        private NetworkClientSettings settings;
-
-        public Builder getMessage()
-        {
-            return message;
-        }
-
-        public NetworkClientPlugin getNetworkClientPlugin()
-        {
-            return networkClientPlugin;
-        }
-
-        public NetworkClientSettings getSettings()
-        {
-            return settings;
-        }
-
-        public void setMessage(Builder message)
-        {
-            this.message = message;
-        }
-
-        public void setNetworkClientPlugin(NetworkClientPlugin networkClientPlugin)
-        {
-            this.networkClientPlugin = networkClientPlugin;
-        }
-
-        public void setSettings(NetworkClientSettings settings)
-        {
-            this.settings = settings;
-        }
-
-        @Override
-        public String toString()
-        {
-            String mstring = this.getMessage() != null ? this.getMessage().build().getClass().getName() : "None";
-            boolean connected = this.getNetworkClientPlugin() != null ? this.getNetworkClientPlugin().isConnected() : false;
-            return String.format("Settings: %s MessageType: %s connected: %b", this.getSettings().toString(), mstring, connected);
         }
     }
 

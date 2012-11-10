@@ -47,8 +47,8 @@ public class ProtoHelper
 
         CoreEnginePHP coreEnginePHP = manager.getPlugin(CoreEnginePHP.class);
         Engine engine = coreEnginePHP.getEngine(new EngineConfigurationImpl());
-        boolean findMessagesOnClassth = engine.findMessagesOnClasspath();
-        Collection<Builder> protoBuilders = engine.getProtoBuilders();
+//        boolean findMessagesOnClassth = engine.findMessagesOnClasspath();
+//        Collection<Builder> protoBuilders = engine.getProtoBuilders();
 
 
 

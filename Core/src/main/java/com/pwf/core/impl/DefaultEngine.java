@@ -6,7 +6,10 @@ import com.pwf.core.Engine;
 import com.pwf.core.EngineConfiguration;
 import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.core.ProtoFilter;
+import java.net.URL;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +22,7 @@ public class DefaultEngine implements Engine
 {
     private static final Logger logger = LoggerFactory.getLogger(Engine.class);
     private EngineConfiguration configuration = null;
-    private Set<Class<? extends Message>> loadedClasses = null;
+    private Map<URL, Set<Class<? extends Message>>> loadedClasses = null;
     private static final ProtoFilter DEFAULT_FILTER = new ProtoFilterImpl();
 
     public DefaultEngine(EngineConfiguration configuration)
@@ -31,6 +34,7 @@ public class DefaultEngine implements Engine
     {
         this.configuration = configuration;
     }
+    //TODO need to rework ENGINE to return a MAP
 
     public Collection<Builder> getProtoBuilders() throws
             NoLoadedMessagesException
@@ -50,7 +54,14 @@ public class DefaultEngine implements Engine
         {
             throw new NoLoadedMessagesException();
         }
-        return EngineUtils.filter(this.loadedClasses, filter);
+
+        Set<Class<? extends Message>> allClasses = new LinkedHashSet<Class<? extends Message>>();
+
+        for (Set<Class<? extends Message>> set : this.loadedClasses.values())
+        {
+            allClasses.addAll(set);
+        }
+        return EngineUtils.filter(allClasses, filter);
     }
 
     public EngineConfiguration getConfiguration()

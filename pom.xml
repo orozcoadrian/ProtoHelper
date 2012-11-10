@@ -5,7 +5,7 @@
     <artifactId>ProtobufHelper</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ProtobufHelper</name>
+    <name>ProtobufHelperParent</name>
     <parent>
         <groupId>com.pwf</groupId>
         <artifactId>PwfMasterParent</artifactId>
@@ -17,6 +17,8 @@
         <module>NetworkingClient</module>
         <module>ProtoHelperPlatform</module>
         <module>Application</module>
-    </modules>
+    <module>ProtobufModelController</module>
+    <module>ConsoleUserInterface</module>
+  </modules>
 
 </project>

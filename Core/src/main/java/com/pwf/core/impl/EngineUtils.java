@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,16 +153,27 @@ public final class EngineUtils
         return builders;
     }
 
-    public static Set<Class<? extends Message>> getMessageFilesonClasspath(String directory)
+    public static Map<URL, Set<Class<? extends Message>>> getMessageFilesonClasspath(String directory)
     {
         List<URL> jarFilesonClasspathUrl = PluginUtils.getJarFilesonClasspathUrl(directory);
         URL[] urlArray = jarFilesonClasspathUrl.toArray(new URL[0]);
-        URLClassLoader urlClassLoader = new URLClassLoader(urlArray);
-        Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forClassLoader(urlClassLoader)).setScanners(new SubTypesScanner(),
-                new TypeAnnotationsScanner(),
-                new ResourcesScanner()));
-        Set<Class<? extends Message>> classes = reflections.getSubTypesOf(Message.class);
-        return classes;
+        Map<URL, Set<Class<? extends Message>>> urlClassMessageMap = new LinkedHashMap<URL, Set<Class<? extends Message>>>();
+
+        for (URL url : urlArray)
+        {
+            URL[] u = new URL[]
+            {
+                url
+            };
+            URLClassLoader urlClassLoader = new URLClassLoader(u);
+
+            Reflections reflections = new Reflections(new ConfigurationBuilder().addClassLoader(urlClassLoader).setUrls(ClasspathHelper.forClassLoader(urlClassLoader)).setScanners(new SubTypesScanner(),
+                    new TypeAnnotationsScanner(),
+                    new ResourcesScanner()));
+            Set<Class<? extends Message>> classes = reflections.getSubTypesOf(Message.class);
+            urlClassMessageMap.put(url, classes);
+        }
+        return urlClassMessageMap;
     }
 
     public static String getDescription(Descriptors.FieldDescriptor fieldDescriptor)
