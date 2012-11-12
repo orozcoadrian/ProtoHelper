@@ -92,14 +92,16 @@ public class App
         CoreEnginePHP coreEnginePHP = manager.getPlugin(CoreEnginePHP.class);
         Engine engine = coreEnginePHP.getEngine(new EngineConfigurationImpl());
         boolean findMessagesOnClassth = engine.findMessagesOnClasspath();
-        Collection<Builder> protoBuilders = engine.getProtoBuilders();
 
-
-        DefaultListModel listModel = new DefaultListModel();
-        for (Builder builder : protoBuilders)
-        {
-            listModel.addElement(builder);
-        }
+          DefaultListModel listModel = new DefaultListModel();
+//        Collection<Builder> protoBuilders = engine.getProtoBuilders();
+//
+//
+//
+//        for (Builder builder : protoBuilders)
+//        {
+//            listModel.addElement(builder);
+//        }
 
         long finish = System.currentTimeMillis();
 

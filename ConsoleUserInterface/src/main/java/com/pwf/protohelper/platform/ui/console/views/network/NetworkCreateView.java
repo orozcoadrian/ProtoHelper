@@ -1,6 +1,8 @@
 package com.pwf.protohelper.platform.ui.console.views.network;
 
 import com.google.protobuf.Message.Builder;
+import com.pwf.core.EngineData;
+import com.pwf.core.impl.EngineUtils;
 import com.pwf.mvc.ControllersManager;
 import com.pwf.mvc.View;
 import com.pwf.protohelper.controllers.EngineController;
@@ -8,7 +10,10 @@ import com.pwf.protohelper.controllers.NetworkDataController;
 import com.pwf.protohelper.models.NetworkData;
 import com.pwf.protohelper.platform.ui.console.command.impl.NetworkClientSettingsImpl;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +40,8 @@ public class NetworkCreateView implements View<NetworkData>
     public void setVisible(boolean visible)
     {
         this.createNetworkSettings();
-        this.selectProtobufMessageType();
+        EngineData selectedEngineData = this.selectEngineData();
+        this.selectProtobufMessageType(selectedEngineData);
         NetworkDataController networkDataController = this.getControllerManager().getController(NetworkDataController.class);
         networkDataController.created(this.data);
     }
@@ -86,14 +92,55 @@ public class NetworkCreateView implements View<NetworkData>
         }
     }
 
-    protected void selectProtobufMessageType()
+    protected EngineData selectEngineData()
     {
-        System.out.println("===========================");
-        System.out.println("Please select from the following Message types");
+        EngineData selected = null;
         try
         {
+
             EngineController engineController = this.getControllerManager().getController(EngineController.class);
-            List<Builder> builders = engineController.getBuilders();
+
+            System.out.println("===========================");
+            System.out.println("Please select from the following Message library to use");
+            List<EngineData> engineDatas = engineController.getAllEngineData();
+            int i = 1;
+            for (EngineData engineData : engineDatas)
+            {
+                System.out.println(i + ": " + engineData);
+                i++;
+            }
+
+
+            System.out.println("===========================");
+            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+            String messageChoice = bufferRead.readLine();
+            //bufferRead.close();
+
+            int messageIndex = Integer.parseInt(messageChoice);
+            selected = engineDatas.get(messageIndex - 1);
+
+        }
+        catch (IOException ex)
+        {
+            System.out.println("Error Occurred! Please try again. " + ex.getMessage());
+        }
+        finally
+        {
+            return selected;
+        }
+    }
+
+    protected void selectProtobufMessageType(EngineData engineData)
+    {
+        System.out.println("===========================");
+        System.out.println("Please select the Transport Message to use");
+        try
+        {
+            List<Builder> builders = new ArrayList<Builder>();
+
+            Collection<Builder> protoBuilders = EngineUtils.getProtoBuilders(engineData);
+            builders.addAll(protoBuilders);
+
             Collections.sort(builders, new Comparator<Builder>()
             {
                 public int compare(Builder o1, Builder o2)
@@ -116,7 +163,8 @@ public class NetworkCreateView implements View<NetworkData>
 
             int messageIndex = Integer.parseInt(messageChoice);
             Builder builder = builders.get(messageIndex - 1);
-            this.data.setMessage(builder);
+            engineData.setTransportMessage(builder);
+            this.data.setEngineData(engineData);
         }
         catch (Exception ex)
         {

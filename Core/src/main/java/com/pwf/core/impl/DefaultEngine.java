@@ -1,14 +1,19 @@
 package com.pwf.core.impl;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.pwf.core.Engine;
 import com.pwf.core.EngineConfiguration;
+import com.pwf.core.EngineData;
 import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.core.ProtoFilter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -22,7 +27,7 @@ public class DefaultEngine implements Engine
 {
     private static final Logger logger = LoggerFactory.getLogger(Engine.class);
     private EngineConfiguration configuration = null;
-    private Map<URL, Set<Class<? extends Message>>> loadedClasses = null;
+    private Map<URL, EngineData> dataMap = null;
     private static final ProtoFilter DEFAULT_FILTER = new ProtoFilterImpl();
 
     public DefaultEngine(EngineConfiguration configuration)
@@ -57,9 +62,9 @@ public class DefaultEngine implements Engine
 
         Set<Class<? extends Message>> allClasses = new LinkedHashSet<Class<? extends Message>>();
 
-        for (Set<Class<? extends Message>> set : this.loadedClasses.values())
+        for (EngineData engineData : this.dataMap.values())
         {
-            allClasses.addAll(set);
+            allClasses.addAll(engineData.getLoadedClasses());
         }
         return EngineUtils.filter(allClasses, filter);
     }
@@ -71,12 +76,29 @@ public class DefaultEngine implements Engine
 
     public boolean findMessagesOnClasspath()
     {
-        this.loadedClasses = EngineUtils.getMessageFilesonClasspath(this.getConfiguration().getLoadDirectory());
+        this.dataMap = EngineUtils.getMessageFilesonClasspath(this.getConfiguration().getLoadDirectory());
         return this.hasLoadedClasses();
     }
 
     protected boolean hasLoadedClasses()
     {
-        return this.loadedClasses != null && !this.loadedClasses.isEmpty();
+        return this.dataMap != null && !this.dataMap.isEmpty();
+    }
+
+    public List<ExtensionRegistry> getExtensionRegistries()
+    {
+        List<ExtensionRegistry> registries = new ArrayList<ExtensionRegistry>();
+        for (EngineData engineData : this.dataMap.values())
+        {
+            ExtensionRegistry extensionRegistry = EngineUtils.createExtensionRegistry(engineData.getLoadedClasses());
+            engineData.setExtensionRegistry(extensionRegistry);
+            registries.add(extensionRegistry);
+        }
+        return registries;
+    }
+
+    public Collection<EngineData> getAllEngineData()
+    {
+        return Collections.unmodifiableCollection(this.dataMap.values());
     }
 }

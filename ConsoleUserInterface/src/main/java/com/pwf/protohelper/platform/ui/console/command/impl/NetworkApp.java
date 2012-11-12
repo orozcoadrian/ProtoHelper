@@ -101,9 +101,9 @@ public class NetworkApp implements Command
                 NetworkClientPlugin clonePlugin = manager.clonePlugin(getNetworkClientPlugin().getClass());
                 data.setNetworkClientPlugin(clonePlugin);
 
-                //TextFormat.merge("id: 2100 name: \"Mike\" job: \"Software Engineer 2\"", data.getMessage());
+                //TextFormat.merge("id: 2100 name: \"Mike\" job: \"Software Engineer 2\"", data.getEngineData());
 
-                clonePlugin.setMessageType(data.getMessage().build());
+                clonePlugin.setMessageType(data.getEngineData().getTransportMessage().build());
                 clonePlugin.connect(data.getSettings());
             }
 //            catch (ParseException ex)
@@ -125,9 +125,9 @@ public class NetworkApp implements Command
             System.out.println("Messages to send.");
 
 
-            messages = new ArrayList<Builder>(engine.getProtoBuilders());
+         //   messages = new ArrayList<Builder>(engine.getProtoBuilders());
         }
-        catch (NoLoadedMessagesException ex)
+        catch (Exception ex)
         {
             System.out.println("No loaded messages to send.");
         }
@@ -212,8 +212,8 @@ public class NetworkApp implements Command
 
                 NetworkData data = networkDatas.get(connectionIndex);
                 NetworkClientPlugin plugin = data.getNetworkClientPlugin();
-                TextFormat.merge(s, data.getMessage());
-                Message msg = data.getMessage().build();
+                TextFormat.merge(s, data.getEngineData().getTransportMessage());
+                Message msg = data.getEngineData().getTransportMessage().build();
                 System.out.println(TextFormat.shortDebugString(msg));
                 plugin.sendMessage(msg);
             }
@@ -277,7 +277,7 @@ public class NetworkApp implements Command
 
                 NetworkData data = new NetworkData();
                 data.setSettings(networkClientSettingsImpl);
-                data.setMessage(builder);
+                //data.setMessage(builder);
 
                 networkDatas.add(data);
             }

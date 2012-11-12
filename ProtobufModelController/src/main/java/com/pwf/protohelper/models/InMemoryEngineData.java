@@ -1,9 +1,11 @@
 package com.pwf.protohelper.models;
 
-import com.google.protobuf.Message.Builder;
-import java.util.ArrayList;
+import com.pwf.core.EngineData;
+import java.net.URL;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
@@ -11,31 +13,31 @@ import java.util.List;
  */
 public class InMemoryEngineData implements EngineDataRepository
 {
-    private List<Builder> builderList = new ArrayList<Builder>();
+    private Map<URL, EngineData> engineMap = new LinkedHashMap<URL, EngineData>();
 
-    public void add(Builder model)
+    public void add(EngineData model)
     {
-        this.builderList.add(model);
+        this.engineMap.put(model.getLibaryId(), model);
     }
 
-    public void remove(Builder model)
+    public void remove(EngineData model)
     {
-        this.builderList.remove(model);
+        this.engineMap.remove(model.getLibaryId());
     }
 
-    public Collection<Builder> getAll()
+    public Collection<EngineData> getAll()
     {
-        return this.builderList;
+        return Collections.unmodifiableCollection(this.engineMap.values());
     }
 
-    public Builder findById(int id)
+    public EngineData findById(int id)
     {
-        return this.builderList.get(id);
+        throw new UnsupportedOperationException();
     }
 
     public void removeAll()
     {
-        this.builderList.clear();
+        this.engineMap.clear();
     }
 
     public void save()

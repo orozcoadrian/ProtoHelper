@@ -2,6 +2,7 @@ package com.pwf.ui;
 
 import com.google.protobuf.Message;
 import com.pwf.core.Engine;
+import com.pwf.core.EngineData;
 import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.plugin.PluginInformation;
 import com.pwf.plugin.PluginManagerLite;
@@ -29,36 +30,29 @@ public class ProtoHelperSwingUI implements UserInterfacePHP
     @Override
     public void startInterface(Engine coreEngine)
     {
-        try
+        this.engine = coreEngine;
+
+        boolean findMessagesOnClassth = engine.findMessagesOnClasspath();
+        Collection<EngineData> allEngineData = engine.getAllEngineData();
+
+
+        DefaultListModel listModel = new DefaultListModel();
+        for (EngineData engineData : allEngineData)
         {
-            this.engine = coreEngine;
-
-            boolean findMessagesOnClassth = engine.findMessagesOnClasspath();
-            Collection<Message.Builder> protoBuilders = engine.getProtoBuilders();
-
-
-            DefaultListModel listModel = new DefaultListModel();
-            for (Message.Builder builder : protoBuilders)
-            {
-                listModel.addElement(builder);
-            }
-
-
-            JList list = new JList(listModel);
-
-            JScrollPane scrollPane = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-            JPanel panel = new JPanel(new BorderLayout());
-            panel.add(scrollPane, BorderLayout.CENTER);
-
-            JFrame frame = new JFrame("Protos");
-            frame.add(panel);
-            frame.pack();
-            frame.setVisible(true);
+            listModel.addElement(engineData);
         }
-        catch (NoLoadedMessagesException ex)
-        {
-            Logger.getLogger(ProtoHelperSwingUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+
+        JList list = new JList(listModel);
+
+        JScrollPane scrollPane = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JFrame frame = new JFrame("Protos");
+        frame.add(panel);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     @Override

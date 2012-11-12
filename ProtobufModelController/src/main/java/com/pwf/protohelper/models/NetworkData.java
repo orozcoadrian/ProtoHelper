@@ -1,7 +1,6 @@
 package com.pwf.protohelper.models;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Message.Builder;
+import com.pwf.core.EngineData;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.plugin.network.client.NetworkClientSettings;
 
@@ -13,12 +12,12 @@ public class NetworkData
 {
     private int id;
     private NetworkClientPlugin networkClientPlugin;
-    private Message.Builder message;
+    private EngineData engineData;
     private NetworkClientSettings settings;
 
-    public Builder getMessage()
+    public EngineData getEngineData()
     {
-        return message;
+        return this.engineData;
     }
 
     public NetworkClientPlugin getNetworkClientPlugin()
@@ -31,9 +30,9 @@ public class NetworkData
         return settings;
     }
 
-    public void setMessage(Builder message)
+    public void setEngineData(EngineData data)
     {
-        this.message = message;
+        this.engineData = data;
     }
 
     public void setNetworkClientPlugin(NetworkClientPlugin networkClientPlugin)
@@ -59,7 +58,7 @@ public class NetworkData
     @Override
     public String toString()
     {
-        String mstring = this.getMessage() != null ? this.getMessage().build().getClass().getName() : "None";
+        String mstring = this.getEngineData() != null ? this.getEngineData().getTransportMessage().getClass().getName() : "None";
         boolean connected = this.getNetworkClientPlugin() != null ? this.getNetworkClientPlugin().isConnected() : false;
         return String.format("Id: %d Settings: %s MessageType: %s connected: %b", this.getId(), this.getSettings().toString(), mstring, connected);
     }

@@ -71,7 +71,7 @@ public class NetworkDataController extends AbstractController
     public void edited(NetworkData networkData)
     {
         NetworkData nd = this.networkDataRepository.findById(networkData.getId());
-        nd.setMessage(networkData.getMessage());
+        nd.setEngineData(networkData.getEngineData());
         nd.setNetworkClientPlugin(networkData.getNetworkClientPlugin());
         nd.setSettings(networkData.getSettings());
 

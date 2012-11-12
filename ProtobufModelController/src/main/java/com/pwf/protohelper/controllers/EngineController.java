@@ -4,8 +4,7 @@ import com.pwf.core.Engine;
 import com.pwf.mvc.AbstractController;
 import com.pwf.protohelper.models.EngineDataRepository;
 import com.pwf.protohelper.models.InMemoryEngineData;
-import com.google.protobuf.Message.Builder;
-import com.pwf.core.NoLoadedMessagesException;
+import com.pwf.core.EngineData;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -42,32 +41,25 @@ public class EngineController extends AbstractController
         this.engine = engine;
     }
 
-    public List<Builder> loadAvailableBuilders()
+    protected List<EngineData> loadAvailableEngineData()
     {
         boolean foundMessagesOnClasspath = this.engine.findMessagesOnClasspath();
         if (foundMessagesOnClasspath)
         {
-            try
+            for (EngineData engineData : this.engine.getAllEngineData())
             {
-                for (Builder builder : this.engine.getProtoBuilders())
-                {
-                    this.engineDataRepository.add(builder);
-                }
-            }
-            catch (NoLoadedMessagesException ex)
-            {
-                logger.error("Error:", ex);
+                this.engineDataRepository.add(engineData);
             }
         }
-        return this.getBuilders();
+        return this.getAllEngineData();
     }
 
-    public List<Builder> getBuilders()
+    public List<EngineData> getAllEngineData()
     {
         if (this.engineDataRepository.getAll().isEmpty())
         {
-            return loadAvailableBuilders();
+            return loadAvailableEngineData();
         }
-        return new ArrayList<Builder>(this.engineDataRepository.getAll());
+        return new ArrayList<EngineData>(this.engineDataRepository.getAll());
     }
 }

@@ -1,9 +1,14 @@
 package com.pwf.core.impl;
 
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
+import com.pwf.core.EngineData;
+import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.core.ProtoFilter;
 import com.pwf.plugin.impl.PluginUtils;
 import java.lang.reflect.Method;
@@ -15,9 +20,11 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -36,6 +43,7 @@ public final class EngineUtils
     private static final Logger logger = LoggerFactory.getLogger(EngineUtils.class);
     private static final Map<Descriptors.FieldDescriptor.JavaType, Class> classMap = new EnumMap<Descriptors.FieldDescriptor.JavaType, Class>(Descriptors.FieldDescriptor.JavaType.class);
     private static final Map<Class, Object> defaultObjectMap = new HashMap<Class, Object>();
+    private static final ProtoFilter DEFAULT_FILTER = new ProtoFilterImpl();
 
     static
     {
@@ -59,6 +67,89 @@ public final class EngineUtils
         defaultObjectMap.put(Long.class, 0);
     }
 
+    public static ExtensionRegistry createExtensionRegistry(Set<Class<? extends Message>> classes)
+    {
+        ExtensionRegistry registry = ExtensionRegistry.newInstance();
+        Set<FieldDescriptor> uniqueExtensions = new HashSet<FieldDescriptor>();
+        Set<Class<?>> allPossibleExtensionClasses = new HashSet<Class<?>>();
+        for (Class<? extends Message> c : classes)
+        {
+            allPossibleExtensionClasses.addAll(getAllPossibleExtensionClasses(c));
+        }
+        for (Class<?> possibleExtensionClass : allPossibleExtensionClasses)
+        {
+            //option 1
+            //uniqueExtensions.addAll(getGeneratedExtensions(possibleExtensionClass));
+//            for (FieldDescriptor fieldDescriptor : uniqueExtensions)
+//            {
+//                registry.add(fieldDescriptor);
+//            }
+            //option 2
+            try
+            {
+                Method registerAllExtensionsMethod = possibleExtensionClass.getDeclaredMethod("registerAllExtensions", ExtensionRegistry.class);
+                if (registerAllExtensionsMethod != null)
+                {
+                    registerAllExtensionsMethod.invoke(null, registry);
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+
+        }
+
+        return registry;
+    }
+
+    public static Set<Class<?>> getAllPossibleExtensionClasses(Set<Class<?>> extensionClasses, Class<?> klass)
+    {
+        if (extensionClasses == null)
+        {
+            extensionClasses = new LinkedHashSet<Class<?>>();
+        }
+
+        extensionClasses.add(klass);
+        if (klass.getDeclaringClass() == null)
+        {
+            return extensionClasses;
+        }
+        return getAllPossibleExtensionClasses(extensionClasses, klass.getDeclaringClass());
+    }
+
+    public static Set<Class<?>> getAllPossibleExtensionClasses(Class<?> klass)
+    {
+        return getAllPossibleExtensionClasses(null, klass);
+    }
+
+    public static Set<FieldDescriptor> getGeneratedExtensions(Class<?> klass)
+    {
+        Set<FieldDescriptor> extensions = new HashSet<FieldDescriptor>();
+        try
+        {
+            Method getDescriptorMethod = klass.getDeclaredMethod("getDescriptor");
+            if (getDescriptorMethod != null)
+            {
+                Descriptor methodDescriptor = (Descriptor) getDescriptorMethod.invoke(null);
+                List<FieldDescriptor> ex = methodDescriptor.getExtensions();
+                extensions.addAll(ex);
+            }
+
+        }
+        catch (NoSuchMethodException ex)
+        {
+            java.util.logging.Logger.getLogger(EngineUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (SecurityException ex)
+        {
+            java.util.logging.Logger.getLogger(EngineUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally
+        {
+            return extensions;
+        }
+    }
+
     public static Collection<Builder> filter(Set<Class<? extends Message>> loadedClasses, ProtoFilter filter)
     {
         Collection<Class<? extends Message>> filteredProtos = new ArrayList<Class<? extends Message>>();
@@ -72,6 +163,14 @@ public final class EngineUtils
         }
 
         return EngineUtils.getBuildersFromClasses(filteredProtos);
+    }
+
+    public static ExtensionRegistry generateExtensionRegistry(EngineData data)
+    {
+        ExtensionRegistry extensionRegistry = EngineUtils.createExtensionRegistry(data.getLoadedClasses());
+        data.setExtensionRegistry(extensionRegistry);
+
+        return data.getExtensionRegistry();
     }
 
     private EngineUtils()
@@ -153,11 +252,11 @@ public final class EngineUtils
         return builders;
     }
 
-    public static Map<URL, Set<Class<? extends Message>>> getMessageFilesonClasspath(String directory)
+    public static Map<URL, EngineData> getMessageFilesonClasspath(String directory)
     {
         List<URL> jarFilesonClasspathUrl = PluginUtils.getJarFilesonClasspathUrl(directory);
         URL[] urlArray = jarFilesonClasspathUrl.toArray(new URL[0]);
-        Map<URL, Set<Class<? extends Message>>> urlClassMessageMap = new LinkedHashMap<URL, Set<Class<? extends Message>>>();
+        Map<URL, EngineData> urlClassMessageMap = new LinkedHashMap<URL, EngineData>();
 
         for (URL url : urlArray)
         {
@@ -171,9 +270,42 @@ public final class EngineUtils
                     new TypeAnnotationsScanner(),
                     new ResourcesScanner()));
             Set<Class<? extends Message>> classes = reflections.getSubTypesOf(Message.class);
-            urlClassMessageMap.put(url, classes);
+            EngineData data = new EngineData();
+            data.setLibaryId(url);
+            data.setLoadedClasses(classes);
+            urlClassMessageMap.put(url, data);
         }
         return urlClassMessageMap;
+    }
+
+    protected static boolean hasLoadedClasses(EngineData data)
+    {
+        return data != null && !data.getLoadedClasses().isEmpty();
+    }
+
+    public static Collection<Builder> getProtoBuilders(EngineData data) throws
+            NoLoadedMessagesException
+    {
+        if (!hasLoadedClasses(data))
+        {
+            throw new NoLoadedMessagesException();
+        }
+
+        return getFilteredProtoBuilders(data, DEFAULT_FILTER);
+    }
+
+    public static Collection<Builder> getFilteredProtoBuilders(EngineData data, ProtoFilter filter)
+            throws NoLoadedMessagesException
+    {
+        if (!hasLoadedClasses(data))
+        {
+            throw new NoLoadedMessagesException();
+        }
+
+        Set<Class<? extends Message>> allClasses = new LinkedHashSet<Class<? extends Message>>();
+        allClasses.addAll(data.getLoadedClasses());
+
+        return EngineUtils.filter(allClasses, filter);
     }
 
     public static String getDescription(Descriptors.FieldDescriptor fieldDescriptor)
