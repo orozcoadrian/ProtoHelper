@@ -1,16 +1,12 @@
 package com.pwf.ui;
 
-import com.google.protobuf.Message;
 import com.pwf.core.Engine;
 import com.pwf.core.EngineData;
-import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.plugin.PluginInformation;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.protohelper.platform.UserInterfacePHP;
 import java.awt.BorderLayout;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
