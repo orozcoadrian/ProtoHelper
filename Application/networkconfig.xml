@@ -1,0 +1,13 @@
+<Connections>
+  <NetworkConnection>
+    <networkClientSettings>
+      <port>5011</port>
+      <SSL>false</SSL>
+      <ipAddress>localhost</ipAddress>
+    </networkClientSettings>
+    <url>file:/D:/Software_Development/PWFTech/repository/ProtobufHelperParent/Application/lib/Messaging-1.0-SNAPSHOT.jar</url>
+    <networkPluginClass>com.pwf.network.client.NettyProtobufNetworkClient</networkPluginClass>
+    <transportMessageClass>com.pwf.ls.messaging.ExampleMessageProto$Example$Builder</transportMessageClass>
+  </NetworkConnection>
+
+</Connections>

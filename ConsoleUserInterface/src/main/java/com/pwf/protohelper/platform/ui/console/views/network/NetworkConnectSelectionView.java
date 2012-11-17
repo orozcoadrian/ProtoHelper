@@ -1,0 +1,57 @@
+package com.pwf.protohelper.platform.ui.console.views.network;
+
+import com.pwf.mvc.ControllersManager;
+import com.pwf.mvc.View;
+import com.pwf.protohelper.controllers.NetworkDataController;
+import com.pwf.protohelper.models.NetworkData;
+import com.pwf.protohelper.platform.ui.console.ConsoleUtils;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author mfullen
+ */
+public class NetworkConnectSelectionView implements View<NetworkData>
+{
+    private ControllersManager controllersManager = null;
+    private NetworkData data;
+
+    public NetworkConnectSelectionView()
+    {
+    }
+
+    public void update(NetworkData model)
+    {
+        this.data = model;
+        this.setVisible(true);
+    }
+
+    public void setVisible(boolean visible)
+    {
+        NetworkDataController networkDataController = this.getControllerManager().getController(NetworkDataController.class);
+        List<NetworkData> arrayList = new ArrayList<NetworkData>(networkDataController.getNetworkData());
+        String messageChoice = ConsoleUtils.getInputFromUser();
+
+        int messageIndex = Integer.parseInt(messageChoice);
+        this.data = arrayList.get(messageIndex - 1);
+
+        networkDataController.connect(data);
+
+    }
+
+    public String getName()
+    {
+        return NetworkDataController.NETWORK_DATA_SELECTION;
+    }
+
+    public void setControllerManager(ControllersManager controllerManager)
+    {
+        this.controllersManager = controllerManager;
+    }
+
+    public ControllersManager getControllerManager()
+    {
+        return this.controllersManager;
+    }
+}
