@@ -1,6 +1,5 @@
 package com.pwf.protohelper;
 
-import com.google.protobuf.Message.Builder;
 import com.pwf.core.Engine;
 import com.pwf.core.EngineConfiguration;
 import com.pwf.core.NoLoadedMessagesException;
@@ -27,7 +26,7 @@ public class ProtoHelper
     public static void main(String[] args) throws NoLoadedMessagesException
     {
         long start = System.currentTimeMillis();
-        PluginManager manager = PluginManagerFactory.createPluginManager();
+        final PluginManager manager = PluginManagerFactory.createPluginManager();
 
         manager.addErrorHandler(new ErrorEventListener()
         {
@@ -46,26 +45,29 @@ public class ProtoHelper
         }
 
         CoreEnginePHP coreEnginePHP = manager.getPlugin(CoreEnginePHP.class);
-        Engine engine = coreEnginePHP.getEngine(new EngineConfigurationImpl());
-//        boolean findMessagesOnClassth = engine.findMessagesOnClasspath();
-//        Collection<Builder> protoBuilders = engine.getProtoBuilders();
+        final Engine engine = coreEnginePHP.getEngine(new EngineConfigurationImpl());
+        Runnable uiRunnable = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                UserInterfacePHP ui = manager.getPlugin(UserInterfacePHP.class);
 
+                if (ui == null)
+                {
+                    ui = new ConsoleUserInterface();
+                    manager.loadAndActivatePlugin(ui);
+                }
 
+                ui.startInterface(engine);
+            }
+        };
+
+        new Thread(uiRunnable).start();
 
         long finish = System.currentTimeMillis();
 
         logger.debug("Took this many MS: " + (finish - start));
-
-
-        UserInterfacePHP ui = manager.getPlugin(UserInterfacePHP.class);
-
-        if (ui == null)
-        {
-            ui = new ConsoleUserInterface();
-            manager.loadAndActivatePlugin(ui);
-        }
-
-        ui.startInterface(engine);
     }
 
     static class EngineConfigurationImpl implements EngineConfiguration

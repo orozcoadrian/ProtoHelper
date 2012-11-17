@@ -5,12 +5,13 @@ import com.pwf.core.EngineData;
 import com.pwf.core.impl.EngineUtils;
 import com.pwf.mvc.ControllersManager;
 import com.pwf.mvc.View;
+import com.pwf.plugin.network.client.DefaultNetworkClientSettings;
+import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.protohelper.controllers.EngineController;
 import com.pwf.protohelper.controllers.NetworkDataController;
 import com.pwf.protohelper.models.NetworkData;
-import com.pwf.protohelper.platform.ui.console.command.impl.NetworkClientSettingsImpl;
+import com.pwf.protohelper.platform.ui.console.ConsoleUtils;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +27,7 @@ public class NetworkCreateView implements View<NetworkData>
 {
     private ControllersManager controllersManager = null;
     private NetworkData data;
+    private static BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
 
     public NetworkCreateView()
     {
@@ -39,11 +41,15 @@ public class NetworkCreateView implements View<NetworkData>
 
     public void setVisible(boolean visible)
     {
+        NetworkDataController networkDataController = this.getControllerManager().getController(NetworkDataController.class);
+        NetworkClientPlugin networkClientPlugin = this.selectNetworkClientPlugin(networkDataController);
+        this.data.setNetworkClientPlugin(networkClientPlugin);
         this.createNetworkSettings();
         EngineData selectedEngineData = this.selectEngineData();
         this.selectProtobufMessageType(selectedEngineData);
-        NetworkDataController networkDataController = this.getControllerManager().getController(NetworkDataController.class);
+
         networkDataController.created(this.data);
+        System.out.println("Network Data Created: " + this.data);
     }
 
     protected void createNetworkSettings()
@@ -56,8 +62,7 @@ public class NetworkCreateView implements View<NetworkData>
             System.out.println("create <ip> <port> (ssl)");
             System.out.println("===========================");
 
-            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-            String s = bufferRead.readLine();
+            String s = ConsoleUtils.getInputFromUser();
             String[] split = s.split(" ");
             if (split.length > 0)
             {
@@ -67,8 +72,6 @@ public class NetworkCreateView implements View<NetworkData>
                     int port = Integer.valueOf(split[2]);
                     boolean ssl = false;
 
-                    // bufferRead.close();
-
                     if (split.length == 4)
                     {
                         if (split[3].startsWith("ssl"))
@@ -77,7 +80,7 @@ public class NetworkCreateView implements View<NetworkData>
                         }
                     }
 
-                    NetworkClientSettingsImpl settings = new NetworkClientSettingsImpl();
+                    DefaultNetworkClientSettings settings = new DefaultNetworkClientSettings();
                     settings.setIpAddress(ip);
                     settings.setPort(port);
                     settings.setSSL(ssl);
@@ -97,7 +100,6 @@ public class NetworkCreateView implements View<NetworkData>
         EngineData selected = null;
         try
         {
-
             EngineController engineController = this.getControllerManager().getController(EngineController.class);
 
             System.out.println("===========================");
@@ -112,15 +114,14 @@ public class NetworkCreateView implements View<NetworkData>
 
 
             System.out.println("===========================");
-            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-            String messageChoice = bufferRead.readLine();
-            //bufferRead.close();
+
+            String messageChoice = ConsoleUtils.getInputFromUser();
 
             int messageIndex = Integer.parseInt(messageChoice);
             selected = engineDatas.get(messageIndex - 1);
 
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             System.out.println("Error Occurred! Please try again. " + ex.getMessage());
         }
@@ -157,9 +158,7 @@ public class NetworkCreateView implements View<NetworkData>
             }
             System.out.println("===========================");
 
-            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-            String messageChoice = bufferRead.readLine();
-            //bufferRead.close();
+            String messageChoice = ConsoleUtils.getInputFromUser();
 
             int messageIndex = Integer.parseInt(messageChoice);
             Builder builder = builders.get(messageIndex - 1);
@@ -185,5 +184,33 @@ public class NetworkCreateView implements View<NetworkData>
     public ControllersManager getControllerManager()
     {
         return this.controllersManager;
+    }
+
+    protected NetworkClientPlugin selectNetworkClientPlugin(NetworkDataController networkDataController)
+    {
+
+        List<NetworkClientPlugin> availableNetworkPlugins = new ArrayList<NetworkClientPlugin>(networkDataController.getAvailableNetworkPlugins());
+        if (availableNetworkPlugins.isEmpty())
+        {
+            System.out.println("No network plugins available");
+            return null;
+        }
+        if (availableNetworkPlugins.size() == 1)
+        {
+            return networkDataController.autoSelectNetworkClientPlugin();
+        }
+        System.out.println("==================================================");
+        System.out.println("Please select the network client plugin to use:");
+        int i = 1;
+        for (NetworkClientPlugin networkClientPlugin : availableNetworkPlugins)
+        {
+            System.out.println(i++ + ":" + networkClientPlugin);
+        }
+        System.out.println("==================================================");
+
+        String messageChoice = ConsoleUtils.getInputFromUser();
+
+        int messageIndex = Integer.parseInt(messageChoice);
+        return availableNetworkPlugins.get(messageIndex - 1);
     }
 }

@@ -62,4 +62,9 @@ public class EngineController extends AbstractController
         }
         return new ArrayList<EngineData>(this.engineDataRepository.getAll());
     }
+
+    public void loadExtensionRegistry()
+    {
+        this.engine.getExtensionRegistries();
+    }
 }

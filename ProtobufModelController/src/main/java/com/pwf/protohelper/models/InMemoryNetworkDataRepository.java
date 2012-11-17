@@ -40,4 +40,17 @@ public class InMemoryNetworkDataRepository implements NetworkDataRepository
     public void save()
     {
     }
+
+    public Collection<FlatNetworkData> load()
+    {
+        return null;
+    }
+
+    public void addAll(Collection<NetworkData> networkData)
+    {
+        for (NetworkData nd : networkData)
+        {
+            this.add(nd);
+        }
+    }
 }

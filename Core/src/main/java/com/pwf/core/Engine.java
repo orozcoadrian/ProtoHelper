@@ -1,7 +1,6 @@
 package com.pwf.core;
 
 import com.google.protobuf.ExtensionRegistry;
-import com.google.protobuf.Message.Builder;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,12 +11,10 @@ import java.util.List;
 public interface Engine
 {
     //Collection<Builder> getProtoBuilders() throws NoLoadedMessagesException;
-
     //Collection<Builder> getFilteredProtoBuilders(ProtoFilter filter) throws NoLoadedMessagesException;
-
     EngineConfiguration getConfiguration();
 
-    //List<ExtensionRegistry> getExtensionRegistries();
+    List<ExtensionRegistry> getExtensionRegistries();
 
     Collection<EngineData> getAllEngineData();
 

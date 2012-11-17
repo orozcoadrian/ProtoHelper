@@ -1,11 +1,14 @@
 package com.pwf.protohelper.models;
 
 import com.pwf.core.EngineData;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,5 +45,24 @@ public class InMemoryEngineData implements EngineDataRepository
 
     public void save()
     {
+    }
+
+    public EngineData findBy(String url)
+    {
+        for (EngineData engineData : this.getAll())
+        {
+            try
+            {
+                if (engineData.getLibaryId().sameFile(new URL(url)))
+                {
+                    return engineData;
+                }
+            }
+            catch (MalformedURLException ex)
+            {
+                Logger.getLogger(InMemoryEngineData.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return null;
     }
 }

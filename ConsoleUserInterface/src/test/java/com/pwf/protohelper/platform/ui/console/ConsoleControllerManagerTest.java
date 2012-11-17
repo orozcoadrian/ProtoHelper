@@ -1,5 +1,3 @@
-
-
 package com.pwf.protohelper.platform.ui.console;
 
 import org.junit.Test;
@@ -13,9 +11,10 @@ import org.junit.BeforeClass;
  *
  * @author mfullen
  */
-public class ConsoleControllerManagerTest {
-
-    public ConsoleControllerManagerTest() {
+public class ConsoleControllerManagerTest
+{
+    public ConsoleControllerManagerTest()
+    {
     }
 
     @BeforeClass
@@ -37,13 +36,13 @@ public class ConsoleControllerManagerTest {
     }
 
     /**
-     * Test of createNetworkDataController method, of class ConsoleControllerManager.
+     * Test of createNetworkDataController method, of class
+     * ConsoleControllerManager.
      */
     @Test
     public void testCreateNetworkDataController()
     {
-        NetworkDataController createNetworkDataController = ConsoleControllerManager.createNetworkDataController();
-       // createNetworkDataController.create();
+        //NetworkDataController createNetworkDataController = ConsoleControllerManager.createNetworkDataController(this.pluginManager);
+        // createNetworkDataController.create();
     }
-
 }

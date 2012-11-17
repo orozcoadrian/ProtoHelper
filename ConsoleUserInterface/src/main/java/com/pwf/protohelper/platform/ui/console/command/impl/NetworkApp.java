@@ -6,10 +6,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
 import com.pwf.core.Engine;
-import com.pwf.core.NoLoadedMessagesException;
 import com.pwf.plugin.PluginManagerLite;
+import com.pwf.plugin.network.client.DefaultNetworkClientSettings;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
-import com.pwf.plugin.network.client.NetworkClientSettings;
 import com.pwf.protohelper.platform.ui.console.ConsoleUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -125,7 +124,7 @@ public class NetworkApp implements Command
             System.out.println("Messages to send.");
 
 
-         //   messages = new ArrayList<Builder>(engine.getProtoBuilders());
+            //   messages = new ArrayList<Builder>(engine.getProtoBuilders());
         }
         catch (Exception ex)
         {
@@ -270,7 +269,7 @@ public class NetworkApp implements Command
                 int messageIndex = Integer.parseInt(s);
                 Builder builder = getMessages().get(messageIndex - 1);
 
-                NetworkClientSettingsImpl networkClientSettingsImpl = new NetworkClientSettingsImpl();
+                DefaultNetworkClientSettings networkClientSettingsImpl = new DefaultNetworkClientSettings();
                 networkClientSettingsImpl.setIpAddress(ip);
                 networkClientSettingsImpl.setPort(port);
                 networkClientSettingsImpl.setSSL(ssl);

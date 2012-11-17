@@ -1,11 +1,17 @@
 package com.pwf.protohelper.platform.ui.console;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  *
  * @author mfullen
  */
 public final class ConsoleUtils
 {
+    private static BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+
     private ConsoleUtils()
     {
     }
@@ -22,5 +28,24 @@ public final class ConsoleUtils
             }
         }
         return args;
+    }
+
+    public static String getInputFromUser()
+    {
+        String messageChoice = null;
+        try
+        {
+            System.out.print(">>");
+            messageChoice = bufferRead.readLine();
+            return messageChoice;
+        }
+        catch (IOException ex)
+        {
+            System.out.println("Error Occurred! Please try again. " + ex.getMessage());
+        }
+        finally
+        {
+            return messageChoice;
+        }
     }
 }

@@ -1,15 +1,21 @@
 package com.pwf.protohelper.platform.ui.console;
 
+import com.pwf.protohelper.platform.ui.console.views.network.NetworkConnectSelectionView;
 import com.pwf.core.Engine;
 import com.pwf.mvc.Controller;
 import com.pwf.mvc.ControllersManager;
 import com.pwf.mvc.MvcFramework;
 import com.pwf.mvc.PostBackObserver;
 import com.pwf.mvc.View;
+import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.protohelper.controllers.EngineController;
+
 import com.pwf.protohelper.controllers.NetworkDataController;
+import com.pwf.protohelper.models.EngineDataRepository;
+import com.pwf.protohelper.models.InMemoryEngineData;
 import com.pwf.protohelper.models.NetworkData;
+import com.pwf.protohelper.models.XmlNetworkDataRepository;
 import com.pwf.protohelper.platform.ui.console.views.ErrorView;
 import com.pwf.protohelper.platform.ui.console.views.network.NetworkCreateView;
 
@@ -22,15 +28,18 @@ public class ConsoleControllerManager
     private ControllersManager controllersManager = MvcFramework.createControllersManager();
     private static final ErrorView errorView = new ErrorView();
     private Engine engine = null;
+    private PluginManagerLite pluginManager = null;
+    private static EngineDataRepository engineDataRepository = new InMemoryEngineData();
 
-    ConsoleControllerManager(Engine engine)
+    ConsoleControllerManager(Engine engine, PluginManagerLite manager)
     {
         this.engine = engine;
+        this.pluginManager = manager;
     }
 
     public void initialize()
     {
-        this.controllersManager.addController(createNetworkDataController());
+        this.controllersManager.addController(createNetworkDataController(this.pluginManager));
         this.controllersManager.addController(createEngineDataController(this.engine));
 
         this.setControllersManager();
@@ -55,15 +64,19 @@ public class ConsoleControllerManager
     protected static EngineController createEngineDataController(Engine engine)
     {
         EngineController engineDataController = new EngineController(engine);
+        engineDataController.setEngineDataRepository(engineDataRepository);
 
         return engineDataController;
     }
 
-    protected static NetworkDataController createNetworkDataController()
+    protected static NetworkDataController createNetworkDataController(final PluginManagerLite pluginManager)
     {
-        NetworkDataController networkDataController = new NetworkDataController();
+        NetworkDataController networkDataController = new NetworkDataController(pluginManager);
+        networkDataController.setNetworkDataRepository(new XmlNetworkDataRepository());
+        networkDataController.setEngineDataRepository(engineDataRepository);
         networkDataController.addViewObserver(errorView);
         networkDataController.addViewObserver(new NetworkCreateView());
+        networkDataController.addViewObserver(new NetworkConnectSelectionView());
         networkDataController.addPostbackObserver(new PostBackObserver<NetworkData>()
         {
             public void dataToPost(NetworkData model)

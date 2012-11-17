@@ -9,4 +9,5 @@ import com.pwf.mvc.Repository;
  */
 public interface EngineDataRepository extends Repository<EngineData>
 {
+    EngineData findBy(String url);
 }

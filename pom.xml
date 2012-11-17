@@ -19,6 +19,7 @@
         <module>Application</module>
     <module>ProtobufModelController</module>
     <module>ConsoleUserInterface</module>
+    <module>NetworkingClient2</module>
   </modules>
 
 </project>
