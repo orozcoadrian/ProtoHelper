@@ -2,12 +2,15 @@ package com.pwf.protohelper.controllers;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
+import com.google.protobuf.TextFormat;
+import com.google.protobuf.TextFormat.ParseException;
 import com.pwf.core.EngineData;
 import com.pwf.core.impl.EngineUtils;
 import com.pwf.mvc.AbstractController;
 import com.pwf.mvc.ViewNotFoundException;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
+import com.pwf.plugin.network.client.NetworkEventListener;
 import com.pwf.protohelper.models.EngineDataRepository;
 import com.pwf.protohelper.models.FlatNetworkData;
 import com.pwf.protohelper.models.InMemoryNetworkDataRepository;
@@ -15,6 +18,7 @@ import com.pwf.protohelper.models.NetworkData;
 import com.pwf.protohelper.models.NetworkDataRepository;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +34,7 @@ public class NetworkDataController extends AbstractController
     public static final String NETWORK_DATA_DELETE = "delete";
     public static final String NETWORK_DATA_SELECTION = "networkSelection";
     private NetworkDataRepository networkDataRepository = null;
+    private NetworkDataRepository activeConnectionsRepository = null;
     private EngineDataRepository engineDataRepository = null;
     private PluginManagerLite pluginManager;
 
@@ -42,6 +47,7 @@ public class NetworkDataController extends AbstractController
     {
         this(new InMemoryNetworkDataRepository());
         this.pluginManager = pluginManager;
+        this.activeConnectionsRepository = new InMemoryNetworkDataRepository();
     }
 
     NetworkDataController(NetworkDataRepository networkDataRepository)
@@ -80,7 +86,34 @@ public class NetworkDataController extends AbstractController
         this.engineDataRepository = engineDataRepository;
     }
 
-    public void connect(NetworkData data)
+    public void send(final NetworkData data, String message)
+    {
+        NetworkClientPlugin networkClientPlugin = data.getNetworkClientPlugin();
+        if (networkClientPlugin == null)
+        {
+            logger.error("Network plugin null");
+            return;
+        }
+
+        if (data.getEngineData() == null || data.getEngineData().getTransportMessage() == null)
+        {
+            logger.error("Transport message is null");
+            return;
+        }
+        try
+        {
+            TextFormat.merge(message, data.getEngineData().getTransportMessage());
+        }
+        catch (ParseException ex)
+        {
+            logger.error("Error parsing the message", ex);
+        }
+        Message msg = data.getEngineData().getTransportMessage().build();
+        logger.debug("Sending {}", TextFormat.shortDebugString(msg));
+        networkClientPlugin.sendMessage(msg);
+    }
+
+    public void connect(final NetworkData data)
     {
         String errorMessage = "No network settings found.";
         if (data == null)
@@ -106,18 +139,17 @@ public class NetworkDataController extends AbstractController
             return;
         }
         NetworkClientPlugin networkClientPlugin = data.getNetworkClientPlugin();
-        if (!networkClientPlugin.isConnected())
-        {
-            networkClientPlugin.setMessageType(data.getEngineData().getTransportMessage().build());
-            logger.info("Attempting to connect to {}", data.getSettings());
-            networkClientPlugin.connect(data.getSettings());
-        }
-        else
+        if (networkClientPlugin.isConnected())
         {
             logger.warn("Network plugin already connected. Creating another instance of the plugin");
-            //todo clone the plugin and connect with a new instance
+            networkClientPlugin = this.pluginManager.clonePlugin(networkClientPlugin.getClass());
         }
-        //todo add code to keep track of the networkdata active connections
+        //update the networkclient plugin being used
+        networkClientPlugin.addNetworkEventListener(new NetworkEventListenerImpl(data, this.activeConnectionsRepository));
+        data.setNetworkClientPlugin(networkClientPlugin);
+        networkClientPlugin.setMessageType(data.getEngineData().getTransportMessage().build());
+        logger.info("Attempting to connect to {}", data.getSettings());
+        networkClientPlugin.connect(data.getSettings());
     }
 
     public void loadData()
@@ -185,6 +217,11 @@ public class NetworkDataController extends AbstractController
     public Collection<NetworkData> getNetworkData()
     {
         return this.networkDataRepository.getAll();
+    }
+
+    public Collection<NetworkData> getActiveConnections()
+    {
+        return this.activeConnectionsRepository.getAll();
     }
 
     public void selectNetwork()

@@ -5,7 +5,11 @@ import com.pwf.plugin.PluginInformation;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.plugin.network.client.NetworkClientSettings;
+import com.pwf.plugin.network.client.NetworkEventListener;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -25,6 +29,7 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
     private ChannelFuture future = null;
     private Channel channel = null;
     private M messageLite = null;
+    private Collection<NetworkEventListener<M>> listeners = new ArrayList<NetworkEventListener<M>>();
     private PluginInformation pluginInformation = new PluginInformation()
     {
         public String getName()
@@ -65,6 +70,10 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
             //future.getCause().printStackTrace();
             bootstrap.releaseExternalResources();
         }
+        for (NetworkEventListener<M> networkEventListener : listeners)
+        {
+            networkEventListener.onClientConnected();
+        }
     }
 
     public void disconnect()
@@ -75,6 +84,10 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
         // Shut down all thread pools to exit.
         bootstrap.releaseExternalResources();
+        for (NetworkEventListener<M> networkEventListener : listeners)
+        {
+            networkEventListener.onClientDisconnected();
+        }
     }
 
     public boolean isConnected()
@@ -104,7 +117,10 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
 
     public void onHandleMessageReceived(M message)
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        for (NetworkEventListener<M> networkEventListener : listeners)
+        {
+            networkEventListener.onMessageReceived(message);
+        }
     }
 
     public void sendMessage(M message)
@@ -115,6 +131,10 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
         if (lastWriteFuture != null)
         {
             lastWriteFuture.awaitUninterruptibly();
+        }
+        for (NetworkEventListener<M> networkEventListener : listeners)
+        {
+            networkEventListener.onMessageSent(message);
         }
     }
 
@@ -129,5 +149,20 @@ public class NettyProtobufNetworkClient<M extends MessageLite> implements
     public void onErrorOccured(Throwable e)
     {
         this.pluginManager.reportError(this, e);
+    }
+
+    public void addNetworkEventListener(NetworkEventListener<M> listener)
+    {
+        this.listeners.add(listener);
+    }
+
+    public void removeNetworkEventListener(NetworkEventListener<M> listener)
+    {
+        this.listeners.remove(listener);
+    }
+
+    public Collection<NetworkEventListener<M>> getListeners()
+    {
+        return Collections.unmodifiableCollection(this.listeners);
     }
 }

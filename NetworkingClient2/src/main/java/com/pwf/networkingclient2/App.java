@@ -4,6 +4,9 @@ import com.pwf.plugin.PluginInformation;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.plugin.network.client.NetworkClientSettings;
+import com.pwf.plugin.network.client.NetworkEventListener;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Hello world!
@@ -77,5 +80,18 @@ public class App implements NetworkClientPlugin
                 return "test.network.plugin";
             }
         };
+    }
+
+    public void addNetworkEventListener(NetworkEventListener listener)
+    {
+    }
+
+    public void removeNetworkEventListener(NetworkEventListener listener)
+    {
+    }
+
+    public Collection getListeners()
+    {
+        return Collections.EMPTY_LIST;
     }
 }

@@ -10,7 +10,9 @@ import com.pwf.protohelper.platform.ui.console.command.Command;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,6 +83,45 @@ public class ProtohelperConsole
                 }
             }
         };
+        final Command availConnectionsCommand = new Command()
+        {
+            public String getName()
+            {
+                return "activeconn";
+            }
+
+            public void execute(String[] args)
+            {
+                int i = 1;
+                for (NetworkData networkData : networkController.getActiveConnections())
+                {
+                    System.out.println(i++ + ":" + networkData);
+                }
+            }
+        };
+        final Command networkSendCommand = new Command()
+        {
+            public String getName()
+            {
+                return "networksend";
+            }
+
+            public void execute(String[] args)
+            {
+                availConnectionsCommand.execute(args);
+                List<NetworkData> arrayList = new ArrayList<NetworkData>(networkController.getActiveConnections());
+
+                String myargs ="";
+                for (String string : args)
+                {
+                    myargs += string +" ";
+                }
+                String inputFromUser = ConsoleUtils.getInputFromUser();
+                int selection = Integer.parseInt(inputFromUser);
+
+                networkController.send(arrayList.get(selection - 1), myargs);
+            }
+        };
         Command networkConnectCommand = new Command()
         {
             public String getName()
@@ -128,7 +169,9 @@ public class ProtohelperConsole
         this.commands.put(networkSetupCommand.getName(), networkSetupCommand);
         this.commands.put(saveNetworkConfigCommand.getName(), saveNetworkConfigCommand);
         this.commands.put(networkConnectCommand.getName(), networkConnectCommand);
+        this.commands.put(networkSendCommand.getName(), networkSendCommand);
         this.commands.put(loadNetworkConfigCommand.getName(), loadNetworkConfigCommand);
+        this.commands.put(availConnectionsCommand.getName(), availConnectionsCommand);
         this.commands.put(listNetworkConfigCommand.getName(), listNetworkConfigCommand);
         this.commands.put(listEngineData.getName(), listEngineData);
         this.commands.put(helpCommand.getName(), helpCommand);
