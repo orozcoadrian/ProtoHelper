@@ -10,15 +10,14 @@ import com.pwf.mvc.AbstractController;
 import com.pwf.mvc.ViewNotFoundException;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
-import com.pwf.plugin.network.client.NetworkEventListener;
 import com.pwf.protohelper.models.EngineDataRepository;
 import com.pwf.protohelper.models.FlatNetworkData;
+import com.pwf.protohelper.models.InMemoryEngineData;
 import com.pwf.protohelper.models.InMemoryNetworkDataRepository;
 import com.pwf.protohelper.models.NetworkData;
 import com.pwf.protohelper.models.NetworkDataRepository;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +47,7 @@ public class NetworkDataController extends AbstractController
         this(new InMemoryNetworkDataRepository());
         this.pluginManager = pluginManager;
         this.activeConnectionsRepository = new InMemoryNetworkDataRepository();
+        this.engineDataRepository = new InMemoryEngineData();
     }
 
     NetworkDataController(NetworkDataRepository networkDataRepository)
@@ -166,7 +166,6 @@ public class NetworkDataController extends AbstractController
             {
                 try
                 {
-
                     Class<? extends Message> transportClass = null;
                     for (Class<? extends Message> class1 : findBy.getLoadedClasses())
                     {
@@ -188,7 +187,6 @@ public class NetworkDataController extends AbstractController
                 {
                     logger.error("Failure to load data from file", ex);
                 }
-
             }
             data.setEngineData(findBy);
             data.setId(0);
@@ -237,6 +235,9 @@ public class NetworkDataController extends AbstractController
         }
     }
 
+    /**
+     * GET
+     */
     public void create()
     {
         try
@@ -250,12 +251,22 @@ public class NetworkDataController extends AbstractController
         }
     }
 
+    /**
+     * POST DATA
+     *
+     * @param networkData
+     */
     public void created(NetworkData networkData)
     {
         this.networkDataRepository.add(networkData);
         this.networkDataRepository.save();
     }
 
+    /**
+     * GET
+     *
+     * @param id
+     */
     public void edit(int id)
     {
         NetworkData data = this.networkDataRepository.findById(id);
@@ -270,6 +281,11 @@ public class NetworkDataController extends AbstractController
         }
     }
 
+    /**
+     * POST
+     *
+     * @param networkData
+     */
     public void edited(NetworkData networkData)
     {
         NetworkData nd = this.networkDataRepository.findById(networkData.getId());
@@ -280,6 +296,11 @@ public class NetworkDataController extends AbstractController
         this.networkDataRepository.save();
     }
 
+    /**
+     * GET
+     *
+     * @param id
+     */
     public void delete(int id)
     {
         NetworkData data = this.networkDataRepository.findById(id);
@@ -294,6 +315,11 @@ public class NetworkDataController extends AbstractController
         }
     }
 
+    /**
+     * POST
+     *
+     * @param networkData
+     */
     public void deleted(NetworkData networkData)
     {
         NetworkData nd = this.networkDataRepository.findById(networkData.getId());

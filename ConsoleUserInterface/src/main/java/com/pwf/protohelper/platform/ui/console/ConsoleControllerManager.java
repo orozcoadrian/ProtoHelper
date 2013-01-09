@@ -5,7 +5,7 @@ import com.pwf.core.Engine;
 import com.pwf.mvc.Controller;
 import com.pwf.mvc.ControllersManager;
 import com.pwf.mvc.MvcFramework;
-import com.pwf.mvc.PostBackObserver;
+import com.pwf.mvc.PostBackListener;
 import com.pwf.mvc.View;
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
@@ -49,7 +49,7 @@ public class ConsoleControllerManager
     {
         for (Controller controller : this.controllersManager.getAllControllers())
         {
-            for (View<Object> view : controller.getViewObservers())
+            for (View<Object> view : controller.getViews())
             {
                 view.setControllerManager(controllersManager);
             }
@@ -74,12 +74,12 @@ public class ConsoleControllerManager
         NetworkDataController networkDataController = new NetworkDataController(pluginManager);
         networkDataController.setNetworkDataRepository(new XmlNetworkDataRepository());
         networkDataController.setEngineDataRepository(engineDataRepository);
-        networkDataController.addViewObserver(errorView);
-        networkDataController.addViewObserver(new NetworkCreateView());
-        networkDataController.addViewObserver(new NetworkConnectSelectionView());
-        networkDataController.addPostbackObserver(new PostBackObserver<NetworkData>()
+        networkDataController.addViewListener(errorView);
+        networkDataController.addViewListener(new NetworkCreateView());
+        networkDataController.addViewListener(new NetworkConnectSelectionView());
+        networkDataController.addPostbackListener(new PostBackListener<NetworkData>()
         {
-            public void dataToPost(NetworkData model)
+            public void postData(NetworkData model)
             {
                 NetworkClientPlugin networkClientPlugin = model.getNetworkClientPlugin();
                 //networkClientPlugin.s
