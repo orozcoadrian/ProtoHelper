@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Layer: com/pwf/samplemodule/layer.xml
+OpenIDE-Module-Localizing-Bundle: com/pwf/samplemodule/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
