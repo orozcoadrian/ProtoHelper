@@ -1,10 +1,10 @@
 package com.pwf.protohelper.controllers;
 
 import com.pwf.core.Engine;
-import com.pwf.mvc.AbstractController;
+import com.pwf.core.EngineData;
+import com.pwf.mvcme.MvcMeController;
 import com.pwf.protohelper.models.EngineDataRepository;
 import com.pwf.protohelper.models.InMemoryEngineData;
-import com.pwf.core.EngineData;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author mfullen
  */
-public class EngineController extends AbstractController
+public class EngineController extends MvcMeController
 {
     private static final Logger logger = LoggerFactory.getLogger(EngineController.class);
     private EngineDataRepository engineDataRepository = null;
@@ -48,7 +48,7 @@ public class EngineController extends AbstractController
         {
             for (EngineData engineData : this.engine.getAllEngineData())
             {
-                this.engineDataRepository.add(engineData);
+                this.engineDataRepository.create(engineData);
             }
         }
         return this.getAllEngineData();

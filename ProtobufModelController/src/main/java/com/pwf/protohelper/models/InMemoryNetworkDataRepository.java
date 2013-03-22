@@ -12,12 +12,12 @@ public class InMemoryNetworkDataRepository implements NetworkDataRepository
 {
     private List<NetworkData> networkdata = new ArrayList<NetworkData>();
 
-    public void add(NetworkData model)
+    public void create(NetworkData model)
     {
         this.networkdata.add(model);
     }
 
-    public void remove(NetworkData model)
+    public void delete(NetworkData model)
     {
         this.networkdata.remove(model);
     }
@@ -27,12 +27,12 @@ public class InMemoryNetworkDataRepository implements NetworkDataRepository
         return this.networkdata;
     }
 
-    public NetworkData findById(int id)
+    public NetworkData get(int id)
     {
         return this.networkdata.get(id);
     }
 
-    public void removeAll()
+    public void deleteAll()
     {
         this.networkdata.clear();
     }
@@ -50,7 +50,7 @@ public class InMemoryNetworkDataRepository implements NetworkDataRepository
     {
         for (NetworkData nd : networkData)
         {
-            this.add(nd);
+            this.create(nd);
         }
     }
 }

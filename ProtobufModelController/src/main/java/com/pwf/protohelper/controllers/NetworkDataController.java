@@ -6,8 +6,9 @@ import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
 import com.pwf.core.EngineData;
 import com.pwf.core.impl.EngineUtils;
-import com.pwf.mvc.AbstractController;
-import com.pwf.mvc.ViewNotFoundException;
+import com.pwf.mvcme.MvcMeController;
+import com.pwf.mvcme.ViewNotFoundException;
+
 import com.pwf.plugin.PluginManagerLite;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.protohelper.models.EngineDataRepository;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author mfullen
  */
-public class NetworkDataController extends AbstractController
+public class NetworkDataController extends MvcMeController
 {
     private static final Logger logger = LoggerFactory.getLogger(NetworkDataController.class);
     public static final String NETWORK_DATA_CREATE = "create";
@@ -203,7 +204,7 @@ public class NetworkDataController extends AbstractController
                 }
             }
             data.setNetworkClientPlugin(ncp);
-            this.networkDataRepository.add(data);
+            this.networkDataRepository.create(data);
         }
     }
 
@@ -258,7 +259,7 @@ public class NetworkDataController extends AbstractController
      */
     public void created(NetworkData networkData)
     {
-        this.networkDataRepository.add(networkData);
+        this.networkDataRepository.create(networkData);
         this.networkDataRepository.save();
     }
 
@@ -269,7 +270,7 @@ public class NetworkDataController extends AbstractController
      */
     public void edit(int id)
     {
-        NetworkData data = this.networkDataRepository.findById(id);
+        NetworkData data = this.networkDataRepository.get(id);
         try
         {
             this.getView(NETWORK_DATA_EDIT).update(data);
@@ -288,7 +289,7 @@ public class NetworkDataController extends AbstractController
      */
     public void edited(NetworkData networkData)
     {
-        NetworkData nd = this.networkDataRepository.findById(networkData.getId());
+        NetworkData nd = this.networkDataRepository.get(networkData.getId());
         nd.setEngineData(networkData.getEngineData());
         nd.setNetworkClientPlugin(networkData.getNetworkClientPlugin());
         nd.setSettings(networkData.getSettings());
@@ -303,7 +304,7 @@ public class NetworkDataController extends AbstractController
      */
     public void delete(int id)
     {
-        NetworkData data = this.networkDataRepository.findById(id);
+        NetworkData data = this.networkDataRepository.get(id);
         try
         {
             this.getView(NETWORK_DATA_DELETE).update(data);
@@ -322,8 +323,8 @@ public class NetworkDataController extends AbstractController
      */
     public void deleted(NetworkData networkData)
     {
-        NetworkData nd = this.networkDataRepository.findById(networkData.getId());
-        this.networkDataRepository.remove(nd);
+        NetworkData nd = this.networkDataRepository.get(networkData.getId());
+        this.networkDataRepository.delete(nd);
         this.networkDataRepository.save();
     }
 }

@@ -49,7 +49,7 @@ public class XmlNetworkDataRepository extends InMemoryNetworkDataRepository
     {
         try
         {
-            this.removeAll();
+            this.deleteAll();
             Collection<FlatNetworkData> resultsCollection = (Collection<FlatNetworkData>) this.xStream.fromXML(new FileInputStream(filePath));
 
             return resultsCollection;

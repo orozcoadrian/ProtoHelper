@@ -3,8 +3,7 @@ package com.pwf.protohelper.platform.ui.console.views.network;
 import com.google.protobuf.Message.Builder;
 import com.pwf.core.EngineData;
 import com.pwf.core.impl.EngineUtils;
-import com.pwf.mvc.ControllersManager;
-import com.pwf.mvc.View;
+import com.pwf.mvcme.MvcMeView;
 import com.pwf.plugin.network.client.DefaultNetworkClientSettings;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.protohelper.controllers.EngineController;
@@ -23,9 +22,8 @@ import java.util.List;
  *
  * @author mfullen
  */
-public class NetworkCreateView implements View<NetworkData>
+public class NetworkCreateView extends MvcMeView<NetworkData>
 {
-    private ControllersManager controllersManager = null;
     private NetworkData data;
     private static BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
 
@@ -41,7 +39,7 @@ public class NetworkCreateView implements View<NetworkData>
 
     public void setVisible(boolean visible)
     {
-        NetworkDataController networkDataController = this.getControllerManager().getController(NetworkDataController.class);
+        NetworkDataController networkDataController = this.getMvcFramework().getController(NetworkDataController.class);
         NetworkClientPlugin networkClientPlugin = this.selectNetworkClientPlugin(networkDataController);
         this.data.setNetworkClientPlugin(networkClientPlugin);
         this.createNetworkSettings();
@@ -100,7 +98,7 @@ public class NetworkCreateView implements View<NetworkData>
         EngineData selected = null;
         try
         {
-            EngineController engineController = this.getControllerManager().getController(EngineController.class);
+            EngineController engineController = this.getMvcFramework().getController(EngineController.class);
 
             System.out.println("===========================");
             System.out.println("Please select from the following Message library to use");
@@ -174,16 +172,6 @@ public class NetworkCreateView implements View<NetworkData>
     public String getName()
     {
         return "create";
-    }
-
-    public void setControllerManager(ControllersManager controllerManager)
-    {
-        this.controllersManager = controllerManager;
-    }
-
-    public ControllersManager getControllerManager()
-    {
-        return this.controllersManager;
     }
 
     protected NetworkClientPlugin selectNetworkClientPlugin(NetworkDataController networkDataController)

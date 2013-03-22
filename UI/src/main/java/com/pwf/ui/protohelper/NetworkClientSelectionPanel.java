@@ -3,8 +3,8 @@
  */
 package com.pwf.ui.protohelper;
 
-import com.pwf.mvc.ControllersManager;
-import com.pwf.mvc.View;
+import com.pwf.mvcme.MvcFramework;
+import com.pwf.mvcme.View;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import java.awt.Component;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 public class NetworkClientSelectionPanel extends javax.swing.JPanel implements
         View<Collection<NetworkClientPlugin>>
 {
-    private ControllersManager controllersManager = null;
+    private MvcFramework mvcFramework;
     private Collection<NetworkClientPlugin> networkPlugins;
 
     @Override
@@ -40,18 +40,6 @@ public class NetworkClientSelectionPanel extends javax.swing.JPanel implements
     public String getName()
     {
         return "selectNetworkClient";
-    }
-
-    @Override
-    public void setControllerManager(ControllersManager controllerManager)
-    {
-        this.controllersManager = controllerManager;
-    }
-
-    @Override
-    public ControllersManager getControllerManager()
-    {
-        return this.controllersManager;
     }
 
     public NetworkClientPlugin getSelectedNetworkClientPlugin()
@@ -130,4 +118,16 @@ public class NetworkClientSelectionPanel extends javax.swing.JPanel implements
     private javax.swing.JLabel jLabel1;
     private javax.swing.JComboBox networkSelectionCombobox;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public MvcFramework getMvcFramework()
+    {
+        return this.mvcFramework;
+    }
+
+    @Override
+    public void setMvcFramework(MvcFramework mvcFramework)
+    {
+        this.mvcFramework = mvcFramework;
+    }
 }

@@ -1,7 +1,7 @@
 package com.pwf.protohelper.platform.ui.console.views;
 
-import com.pwf.mvc.ControllersManager;
-import com.pwf.mvc.View;
+import com.pwf.mvcme.MvcFramework;
+import com.pwf.mvcme.View;
 
 /**
  *
@@ -9,7 +9,7 @@ import com.pwf.mvc.View;
  */
 public class ErrorView implements View<String>
 {
-    private ControllersManager controllersManager = null;
+    private MvcFramework mvcFramework;
     private String message = "";
 
     public ErrorView()
@@ -35,13 +35,13 @@ public class ErrorView implements View<String>
         return View.ERROR_VIEW_ID;
     }
 
-    public void setControllerManager(ControllersManager controllerManager)
+    public MvcFramework getMvcFramework()
     {
-        this.controllersManager = controllerManager;
+        return mvcFramework;
     }
 
-    public ControllersManager getControllerManager()
+    public void setMvcFramework(MvcFramework mvcFramework)
     {
-        return this.controllersManager;
+        this.mvcFramework = mvcFramework;
     }
 }

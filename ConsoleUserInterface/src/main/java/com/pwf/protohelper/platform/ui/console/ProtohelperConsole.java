@@ -29,8 +29,8 @@ public class ProtohelperConsole
         this.consoleControllerManager = new ConsoleControllerManager(engine, manager);
         this.consoleControllerManager.initialize();
 
-        final NetworkDataController networkController = this.consoleControllerManager.getControllersManager().getController(NetworkDataController.class);
-        final EngineController engineController = this.consoleControllerManager.getControllersManager().getController(EngineController.class);
+        final NetworkDataController networkController = this.consoleControllerManager.getMvcFramework().getController(NetworkDataController.class);
+        final EngineController engineController = this.consoleControllerManager.getMvcFramework().getController(EngineController.class);
         Command networkSetupCommand = new Command()
         {
             public String getName()
@@ -111,10 +111,10 @@ public class ProtohelperConsole
                 availConnectionsCommand.execute(args);
                 List<NetworkData> arrayList = new ArrayList<NetworkData>(networkController.getActiveConnections());
 
-                String myargs ="";
+                String myargs = "";
                 for (String string : args)
                 {
-                    myargs += string +" ";
+                    myargs += string + " ";
                 }
                 String inputFromUser = ConsoleUtils.getInputFromUser();
                 int selection = Integer.parseInt(inputFromUser);
@@ -179,7 +179,7 @@ public class ProtohelperConsole
 
     public void start()
     {
-        final EngineController controller = this.consoleControllerManager.getControllersManager().getController(EngineController.class);
+        final EngineController controller = this.consoleControllerManager.getMvcFramework().getController(EngineController.class);
         Runnable runnable = new Runnable()
         {
             public void run()

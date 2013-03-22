@@ -1,7 +1,7 @@
 package com.pwf.protohelper.models;
 
 import com.pwf.core.EngineData;
-import com.pwf.mvc.Repository;
+import com.pwf.mvcme.Repository;
 
 /**
  *

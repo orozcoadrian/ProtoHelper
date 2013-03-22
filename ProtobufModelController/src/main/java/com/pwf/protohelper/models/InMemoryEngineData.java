@@ -18,12 +18,12 @@ public class InMemoryEngineData implements EngineDataRepository
 {
     private Map<URL, EngineData> engineMap = new LinkedHashMap<URL, EngineData>();
 
-    public void add(EngineData model)
+    public void create(EngineData model)
     {
         this.engineMap.put(model.getLibaryId(), model);
     }
 
-    public void remove(EngineData model)
+    public void delete(EngineData model)
     {
         this.engineMap.remove(model.getLibaryId());
     }
@@ -33,12 +33,12 @@ public class InMemoryEngineData implements EngineDataRepository
         return Collections.unmodifiableCollection(this.engineMap.values());
     }
 
-    public EngineData findById(int id)
+    public EngineData get(int id)
     {
         throw new UnsupportedOperationException();
     }
 
-    public void removeAll()
+    public void deleteAll()
     {
         this.engineMap.clear();
     }

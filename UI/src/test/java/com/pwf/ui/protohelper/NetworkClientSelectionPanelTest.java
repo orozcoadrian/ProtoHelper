@@ -1,13 +1,12 @@
 package com.pwf.ui.protohelper;
 
-import com.pwf.mvc.ControllersManager;
-import com.pwf.mvc.MvcFramework;
+import com.pwf.mvcme.MvcFramework;
+import com.pwf.mvcme.MvcMe;
 import com.pwf.plugin.Plugin;
 import com.pwf.plugin.PluginManager;
 import com.pwf.plugin.PluginManagerFactory;
 import com.pwf.plugin.network.client.NetworkClientPlugin;
 import com.pwf.protohelper.controllers.NetworkDataController;
-import com.pwf.protohelper.models.NetworkData;
 import java.awt.event.ActionEvent;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -34,17 +33,17 @@ public class NetworkClientSelectionPanelTest
 
     protected static void loadNetworkClientSection(NetworkClientPlugin... plugins)
     {
-        ControllersManager cm = MvcFramework.createControllersManager();
+        MvcFramework cm = MvcMe.createMvcFramework();
         final PluginManager pluginManager = PluginManagerFactory.createPluginManager();
         for (NetworkClientPlugin networkClientPlugin : plugins)
         {
             pluginManager.addPlugin(networkClientPlugin);
         }
         final NetworkDataController networkDataController = new NetworkDataController(pluginManager);
-        cm.addController(networkDataController);
+        cm.register(networkDataController);
 
         final NetworkClientSelectionPanel panel = new NetworkClientSelectionPanel();
-        panel.setControllerManager(cm);
+        cm.register(panel);
         panel.update(networkDataController.getAvailableNetworkPlugins());
 
         JFrame frame = new JFrame("NetworkClientSelection Test");

@@ -1,7 +1,6 @@
 package com.pwf.protohelper.platform.ui.console.views.network;
 
-import com.pwf.mvc.ControllersManager;
-import com.pwf.mvc.View;
+import com.pwf.mvcme.MvcMeView;
 import com.pwf.protohelper.controllers.NetworkDataController;
 import com.pwf.protohelper.models.NetworkData;
 import com.pwf.protohelper.platform.ui.console.ConsoleUtils;
@@ -12,9 +11,8 @@ import java.util.List;
  *
  * @author mfullen
  */
-public class NetworkConnectSelectionView implements View<NetworkData>
+public class NetworkConnectSelectionView extends MvcMeView<NetworkData>
 {
-    private ControllersManager controllersManager = null;
     private NetworkData data;
 
     public NetworkConnectSelectionView()
@@ -29,7 +27,7 @@ public class NetworkConnectSelectionView implements View<NetworkData>
 
     public void setVisible(boolean visible)
     {
-        NetworkDataController networkDataController = this.getControllerManager().getController(NetworkDataController.class);
+        NetworkDataController networkDataController = this.getMvcFramework().getController(NetworkDataController.class);
         List<NetworkData> arrayList = new ArrayList<NetworkData>(networkDataController.getNetworkData());
         String messageChoice = ConsoleUtils.getInputFromUser();
 
@@ -43,15 +41,5 @@ public class NetworkConnectSelectionView implements View<NetworkData>
     public String getName()
     {
         return NetworkDataController.NETWORK_DATA_SELECTION;
-    }
-
-    public void setControllerManager(ControllersManager controllerManager)
-    {
-        this.controllersManager = controllerManager;
-    }
-
-    public ControllersManager getControllerManager()
-    {
-        return this.controllersManager;
     }
 }

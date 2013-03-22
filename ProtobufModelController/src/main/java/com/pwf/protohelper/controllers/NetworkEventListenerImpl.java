@@ -22,12 +22,12 @@ class NetworkEventListenerImpl implements NetworkEventListener<Message>
 
     public void onClientConnected()
     {
-        activeConnectionsRepository.add(data);
+        activeConnectionsRepository.create(data);
     }
 
     public void onClientDisconnected()
     {
-        activeConnectionsRepository.remove(data);
+        activeConnectionsRepository.delete(data);
     }
 
     public void onMessageReceived(Message message)
