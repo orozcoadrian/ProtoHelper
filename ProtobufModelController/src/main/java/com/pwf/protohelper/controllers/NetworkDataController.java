@@ -103,7 +103,7 @@ public class NetworkDataController extends MvcMeController
         }
         try
         {
-            TextFormat.merge(message, data.getEngineData().getTransportMessage());
+            TextFormat.merge(message, data.getEngineData().getExtensionRegistry(), data.getEngineData().getTransportMessage());
         }
         catch (ParseException ex)
         {
