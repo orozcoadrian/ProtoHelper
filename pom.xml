@@ -17,7 +17,9 @@
         <module>ConsoleUserInterface</module>
         <module>NetworkingClient2</module>
         <module>NBPUI</module>
-    </modules>
+    <module>SampleMessages</module>
+    <module>SampleServer</module>
+  </modules>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
